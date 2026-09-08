@@ -1,0 +1,18 @@
+# secrets
+.env
+.env.local
+*.local
+.claude/settings.local.json
+.mcp.json
+
+# scratch
+tmp/
+*.log
+__pycache__/
+*.pyc
+
+# lead data (keep the system, not the leads — real prospect PII, never push)
+data/*.json
+data/exports/
+data/*-export.csv
+data/clickup-leads-export.csv

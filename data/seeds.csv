@@ -1,0 +1,6 @@
+industry,company,website,note
+# OPTIONAL. Specific companies you want forced into a /lead-find run (a referral, someone you met,
+# a dream client). /lead-find matches each via Explorium match-business, pulls 1-2 decision-makers,
+# enriches, scores, and adds them alongside the filter-based results. Leave empty to rely purely on
+# the ICP filters (industry + size + country + title + intent). Delete these placeholder rows.
+marketing-agencies,,,
