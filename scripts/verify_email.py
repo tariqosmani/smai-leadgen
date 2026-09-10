@@ -75,10 +75,19 @@ def _run(cmd):
 
 
 def _parse_nslookup(out):
-    """'mx' | 'none' | None (no verdict) from nslookup -type=mx output."""
+    """'mx' | 'none' | 'refused' | None (no verdict) from nslookup -type=mx output.
+
+    'refused' = the resolver failed to answer (REFUSED / SERVFAIL / timeout). That is
+    NOT proof the domain is dead, so the caller falls through instead of concluding
+    'none' (which would hard-flag the address invalid).
+    """
     low = out.lower()
-    if "non-existent domain" in low or "nxdomain" in low or "can't find" in low:
+    if "non-existent domain" in low or "nxdomain" in low:
         return "none"
+    if any(p in low for p in ("query refused", "servfail", "server failed", "refused",
+                              "timed out", "timeout", "no response from server",
+                              "no servers could be reached", "unspecified error")):
+        return "refused"
     hosts = [h.strip().strip(".").lower() for h in _MX_RE.findall(out)]
     if hosts:
         # a lone "(root)" / "." is an RFC 7505 null MX: the domain says "no mail here".
@@ -97,10 +106,13 @@ def mx_lookup(domain):
     """
     if not domain:
         return "none"
+    resolver_failed = False
     _, out = _run(["nslookup", "-type=mx", domain])
     if out:
         verdict = _parse_nslookup(out)
-        if verdict:
+        if verdict == "refused":
+            resolver_failed = True          # can't trust this resolver, keep trying
+        elif verdict:
             return verdict
     rc, out = _run(["dig", "+short", "mx", domain])
     if rc == 0:
@@ -112,7 +124,8 @@ def mx_lookup(domain):
         socket.getaddrinfo(domain, None)
         return "mx"          # resolves to an address -> mail can route to it
     except socket.gaierror:
-        return "none"        # name does not resolve at all
+        # A prior resolver REFUSED/SERVFAIL means we can't call this a dead domain.
+        return "error" if resolver_failed else "none"
     except OSError:
         return "error"       # no network / resolver in this environment
 
@@ -134,7 +147,7 @@ def classify(email, mx):
     if local in ROLE_LOCALPARTS:
         return "invalid", f"role address ({local}@), not a named person"
     if mx == "error":
-        return "unknown", "domain not checked (no DNS tool available here), not confirmed"
+        return "unknown", "domain not checked (DNS lookup failed here), not confirmed"
     return "unknown", "syntax and mail route OK, mailbox not probed (free tier)"
 
 
@@ -173,6 +186,9 @@ def _selfcheck():
     assert _parse_nslookup("google.com\tMX preference = 10, mail exchanger = smtp.google.com") == "mx"
     assert _parse_nslookup("example.com\tMX preference = 0, mail exchanger = (root)") == "none"
     assert _parse_nslookup("*** can't find nope.invalid: Non-existent domain") == "none"
+    assert _parse_nslookup("** server can't find nope.invalid: NXDOMAIN") == "none"
+    assert _parse_nslookup("*** gpon.net can't find bamf.com: Query refused") == "refused"
+    assert _parse_nslookup("connection timed out; no servers could be reached") == "refused"
     assert _parse_nslookup("Server: x\nAddress: 1.2.3.4\n") is None  # no MX line, no verdict
 
     # --- verify_email(): one live smoke, network-tolerant (result must stay a legal status) ---
