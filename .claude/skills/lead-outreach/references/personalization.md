@@ -4,7 +4,7 @@ Personalization drives 50 to 250% more replies (Lavender). The rule that matters
 personalized line has nothing to do with the problem you solve, it is just an attention hack and it
 will not convert.**
 
-> **House rule.** Examples below show the shape. Smart AI Workspace draws its personalization from the
+> **House rule.** Examples below show the shape. Draw personalization from the
 > lead's `Signal` and `Hook` fields in Airtable plus one real detail you can verify (their site, a job
 > post, their stack). No invented observations. No client names in the proof. No em dashes in the draft.
 

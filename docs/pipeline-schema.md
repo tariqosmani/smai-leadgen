@@ -1,15 +1,15 @@
 # Pipeline — the data store (Airtable)
 
-The lead pipeline lives in one Airtable table: **Lead Pipeline**
-in the **SmartAI Listings Database** base. One record = one prospect (a named decision-maker at a
-target company).
+The Airtable schema reference for any client whose `crm_target` is `airtable`. One record =
+one prospect (a named decision-maker at a target company). The base ID and table name for the
+active client come from `clients/<client>/identity.md`; the IDs below are for `smart-ai-workspace`.
 
 | | |
 |---|---|
 | Base | `SmartAI Listings Database` — `appMULkAmdFmneAyB` |
 | Table | `Lead Pipeline` — `tblHGHp4DthpNKAU9` |
 | Access | Airtable MCP (`mcp__airtable__*`) |
-| Config | `AIRTABLE_BASE_ID`, `AIRTABLE_TABLE` in `.env` |
+| Config | base ID + table name in `clients/<client>/identity.md` |
 
 Airtable holds real typed columns, so every lead attribute is its own field — no packed
 description blob.
@@ -22,7 +22,7 @@ description blob.
 | Contact Name | Single line text | |
 | Title | Single line text | |
 | Stage | Single select | the authoritative pipeline stage (values below) |
-| ICP Score | Number (integer) | 0–100, from `docs/scoring.md` |
+| ICP Score | Number (integer) | 0–100, from `clients/<client>/scoring.md` |
 | Channel | Single select | `email + linkedin` / `email` / `linkedin` / `upwork` |
 | Industry | Single select | `real-estate` `e-commerce` `manufacturing` `marketing-agencies` `logistics` `saas` `other` |
 | Email | Email | |
@@ -38,6 +38,7 @@ description blob.
 | Source | Single line text | e.g. `Explorium / Vibe Prospecting — <segment>, <date>` |
 | Activity Log | Long text | dated lines, newest appended (see below) |
 | Proposal Doc | URL | Google Doc link, set by `/lead-proposal` |
+| Deal Value | Currency (USD) | expected or signed deal amount. Optional. Set at Call Booked (expected), confirmed at Proposal Sent / Won. Read by `/lead-report` for pipeline value. |
 | ClickUp Task ID | Single line text | legacy — only on the 5 records migrated from ClickUp |
 | ClickUp URL | URL | legacy |
 

@@ -3,10 +3,11 @@
 Frameworks beat templates. They teach thinking patterns, not copy-paste shortcuts. Pick one that
 fits the lead before you write. Do not freewrite a cold email.
 
-> **House rule for Smart AI Workspace.** The example emails below show STRUCTURE, not copy to reuse.
-> They name invented companies and invented results. Every Smart AI Workspace draft follows the voice
-> rules in `docs/outreach-playbook.md`, cites only real proof from `references/portfolio.md` (no client
-> names, no invented numbers, "built and shipped X" not "helped Y hit Z"), and carries no em dashes.
+> **House rule.** The example emails below show STRUCTURE, not copy to reuse.
+> They name invented companies and invented results. Every draft follows the voice
+> rules in `docs/outreach-playbook.md`, cites only real proof from `clients/<client>/offer.md`
+> (Portfolio proof points: no client names, no invented numbers, "built and shipped X" not
+> "helped Y hit Z"), and carries no em dashes.
 > Take the shape from these frameworks and fill it with something true.
 
 ## Picking a framework

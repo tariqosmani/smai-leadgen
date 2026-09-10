@@ -4,8 +4,10 @@ Channels, cadence, and the voice rules every drafted message must pass. Used by 
 
 ## Voice rules (hard, reject and rewrite if any fail)
 
-From `references/voice.md` and the `lead-outreach` craft references
-(`.claude/skills/lead-outreach/references/`):
+These apply to **every** client. The client-specific register and writing samples are in
+`clients/<client>/voice.md` (resolve the active client from `ACTIVE_CLIENT` in `.env` or a
+`client=<slug>` arg). The no-em-dash and honesty rules also appear in CLAUDE.md > Guardrails.
+Craft references: `.claude/skills/lead-outreach/references/`.
 
 - **No em dashes (—).** Ever. Commas or periods.
 - Lead with *their* situation (the `Hook` / `Signal`), not "I'm Tariq / I help companies…".
@@ -17,7 +19,7 @@ From `references/voice.md` and the `lead-outreach` craft references
 - Professional but warm. No hype, no exclamation marks, no "game-changer".
 - Reference one concrete thing about them (recent hire, a page on their site, a job post, their channel mix).
 - One ask per email, low pressure. An interest-based question ("worth a look?") beats a calendar request. Never "hop on a quick call this week?" x3.
-- Founder-led and honest: "I build these" not "my team delivers". No invented client results, no client names (see `references/portfolio.md`).
+- Founder-led and honest: "I build these" not "my team delivers". No invented client results, no client names (see `clients/<client>/offer.md` > Portfolio proof points).
 - If it reads like AI wrote it, rewrite it.
 
 ## Email cadence (channel = email)
@@ -53,14 +55,19 @@ The system **drafts, you send** — no automation, stay ToS-safe. `/lead-outreac
 
 Different motion — inbound job posts, not outbound. See `/upwork-proposal`. Proposal is short (120–200 words),
 answers the client's stated problem first, cites the closest portfolio build, ends with 2–3 clarifying questions
-(shows you read it, starts the discovery). No pricing in the proposal — pricing follows discovery (pricing-playbook §1).
+(shows you read it, starts the discovery). No pricing in the proposal — pricing follows discovery (`clients/<client>/offer.md` Pricing method §1).
 
 ## After a reply
 
-Out of scope for automation. `/lead-pipeline` surfaces it; Tariq runs the discovery call per `pricing-playbook.md` §1,
-logs notes in col U, then `/lead-proposal` drafts the 3-option proposal.
+Out of scope for automation. `/lead-pipeline` surfaces it; the founder runs the discovery call per
+`clients/<client>/offer.md` Pricing method §1, logs notes in the record, then `/lead-proposal` drafts the 3-option proposal.
 
 ## Logging (every send)
 
 `/lead-outreach` updates the row: Stage → `Contacted`, Last Touch → today, Touches +1, Next Action → next touch,
 Next Action Date → today + gap, and appends `YYYY-MM-DD: sent email touch N` to Notes.
+
+**On any manual stage change** (a reply logged, a call booked, a proposal sent, a deal won or lost),
+append a dated line `YYYY-MM-DD: <new stage>` to the Activity Log. `/lead-report` reads these dates to
+count what moved inside a given week; a stage change with no dated line still shows in the current
+snapshot but is left out of the weekly and week-over-week numbers.

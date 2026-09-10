@@ -54,7 +54,7 @@ others once an email passes the filter. What works: ultra-concise, human, unders
 a specific project or a trigger event. `an update` · `a question` · `[their initiative]`. Anything
 that smells of sales is rejected on sight.
 
-## Smart AI Workspace default
+## Default
 
 Touch 1: 2 to 4 words, lowercase, names their situation or a pain, not the product or their name.
 Touches 2 to 5: reply in the same thread, keep the subject.
