@@ -19,7 +19,9 @@ Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_C
 ## Read first
 - `docs/pipeline-contract.md`: the target-neutral operations and lead fields
 - `docs/pipeline-schema.md`: field reference (Airtable layout, dedupe rule)
+- `docs/email-verification.md`: the verify step, the `email_status` values, free vs paid
 - `scripts/normalize.py`: dedupe helper
+- `scripts/verify_email.py`: email verification helper (free tier)
 
 ## Config
 Pipeline reads and writes go through the **pipeline adapter** for the active client's `crm_target`
@@ -54,11 +56,24 @@ Map the industry to `linkedin_category` values via `autocomplete` (never pass ra
 ### 3. Enrich + export (costs credits)
 `enrich-prospects` with `["enrich-prospects-contacts"]`, `contact_types: ["email"]` → returns the new `table_name` + a cost estimate. Show the estimate. On Tariq's go, `export-to-csv` (pass a prior run's `dataset_id` as `exclude_key` to skip already-seen prospects). Download `_full_download_url`.
 
+### 3b. Verify enriched emails (free)
+Scope: email verification only. Run `scripts/verify_email.py` on each enriched email
+(`verify_email(email)` -> `email_status` + reason). Full behavior: `docs/email-verification.md`.
+- `instantly` client: skip this, Instantly verifies on import. Read its status back into `email_status` instead.
+- Sets the `email_status` contract field per row: `invalid` (bad syntax / disposable / no mail route / role inbox) or `unknown` (the normal pass). `valid` / `catchall` only come from a paid verifier.
+- Keep the reason string, it goes in the seeded Activity Log line.
+
 ### 4. Dedupe
 For each row: `normalize_domain(prospect_company_website)`, then `find_lead_by_domain(<domain>)` via the
 pipeline adapter (pass the company name when there is no domain). Match → skip (note a suggested update);
 no match → keep. Collapse rows so no company gets more than 2 records (keep the most senior, most
 complete contacts).
+
+**Suppression list check** (localized, independent of any email-verification step): if
+`clients/<client>/suppress.md` exists, drop a surviving row when its prospect email matches a full
+address line, or its normalized company domain matches an `@domain` line. Case-insensitive. Ignore
+blank lines and lines starting with `#`; on an entry line read the token before any inline `#`
+comment. These are `/lead-replies` unsubscribes and hard bounces, never re-source them.
 
 ### 5. Score + hook (Claude, per surviving row)
 - **ICP Score:** apply `clients/<client>/scoring.md`. Leads from an `intent`/`hiring` pull auto-earn the intent points.
@@ -66,6 +81,7 @@ complete contacts).
 - **Hook:** 1–2 sentences from their title + company focus + `prospect_skills` + any signal. Ties to one service line in `clients/<client>/offer.md`. No hype, no em dash.
 - **Channel:** `email + linkedin` if both present, else whichever exists.
 - **Stage:** ≥60 `Qualified`, 40–59 `Nurture`, <40 `Disqualified`.
+- **`email_status: invalid` override** (step 3b): the lead must not flow to outreach. If it has a personal `linkedin_url`, keep the band Stage but set `channel` to `linkedin` (drop email) and `next_action` "email failed verification, LinkedIn only". If no LinkedIn, force Stage `Nurture`, `next_action` "needs a valid contact, re-enrich or find another decision-maker". Either way still create the record (company not re-sourced).
 
 ### 6. Show before writing
 ```
@@ -75,11 +91,13 @@ complete contacts).
 Create 5 records in the Airtable Lead Pipeline?
 ```
 On yes → `create_lead` per lead via the pipeline adapter, one value per contract field
-(`docs/pipeline-contract.md`). `stage` per band, `next_action_date` = today for Qualified, seed
-`activity_log` with `YYYY-MM-DD: sourced + scored NN.`. On no → stop.
+(`docs/pipeline-contract.md`), including `email_status` from step 3b. `stage` per band (or the
+step 5 invalid-email override), `next_action_date` = today for Qualified, seed `activity_log`
+with `YYYY-MM-DD: sourced + scored NN.` plus ` email <status> (<reason>).` when the status is not
+a clean `unknown`. On no → stop.
 
 ### 7. Report
-Records created by stage, companies skipped as dups, disqualified + reasons, **credits spent + remaining**, and: "Next: `/lead-outreach` to draft first touches."
+Records created by stage, companies skipped as dups, disqualified + reasons, count of leads with `email_status: invalid` (and whether they fell back to LinkedIn or Nurture), **credits spent + remaining**, and: "Next: `/lead-outreach` to draft first touches."
 
 ## Idempotency
 Re-runnable. Step 4 dedupes against the pipeline; pass the previous `dataset_id` as `exclude_key` so Explorium returns fresh prospects.

@@ -26,7 +26,7 @@ description blob.
 | Channel | Single select | `email + linkedin` / `email` / `linkedin` / `upwork` |
 | Industry | Single select | `real-estate` `e-commerce` `manufacturing` `marketing-agencies` `logistics` `saas` `other` |
 | Email | Email | |
-| Email Status | Single select | `valid` / `catchall` / `unknown` |
+| Email Status | Single select | `valid` / `catchall` / `unknown` / `invalid`. Set by `/lead-find` via `scripts/verify_email.py`, re-checked by `/lead-outreach` before an email send (`docs/email-verification.md`). `create_record` with `typecast: true` adds the `invalid` option the first time it is written; add it by hand in the base if the token cannot. |
 | LinkedIn | URL | the contact's profile |
 | Company Website | Single line text | bare domain, no scheme — **the dedupe key** |
 | Company LinkedIn | URL | |

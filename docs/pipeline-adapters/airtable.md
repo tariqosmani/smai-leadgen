@@ -29,7 +29,7 @@ changes.
 | `channel` | `Channel` (single select) |
 | `industry` | `Industry` (single select) |
 | `email` | `Email` |
-| `email_status` | `Email Status` (single select) |
+| `email_status` | `Email Status` (single select): `valid` / `catchall` / `unknown` / `invalid` |
 | `linkedin_url` | `LinkedIn` |
 | `company_domain` | `Company Website` (bare domain, the dedupe key) |
 | `company_linkedin_url` | `Company LinkedIn` |
@@ -46,6 +46,11 @@ changes.
 Stage values are stored verbatim (`Qualified`, `Nurture`, `Disqualified`, `Contacted`, `Replied`,
 `Call Booked`, `Proposal Sent`, `Won`, `Lost`). The legacy `Contacted (draft)` select option is left
 in the base but never written under Bike Method Phase 3.
+
+`Email Status` values are stored verbatim too (`valid` / `catchall` / `unknown` / `invalid`). With
+`typecast: true` the first `create_record` / `update_records` that writes `invalid` adds the select
+option; if the token lacks schema-write permission, add the option once by hand. `/lead-find` sets
+this field, `/lead-outreach` reads it as a pre-send guard (`docs/email-verification.md`).
 
 ## Operations
 

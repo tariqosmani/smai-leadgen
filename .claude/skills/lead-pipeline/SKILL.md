@@ -29,7 +29,8 @@ Pipeline reads and writes go through the **pipeline adapter** for the active cli
 `list_leads` with no filter (all records) via the pipeline adapter. Read each record's `stage`, `icp_score`, `channel`, `next_action_date`, and `activity_log`.
 
 ### 2. Today's list (most valuable first)
-- **Replies waiting** — Stage `Replied`. → "book the discovery call (`clients/<client>/offer.md` Pricing method §1)"
+- **New replies** — any `Contacted` lead may have an inbound reply the cadence has not caught. → "run `/lead-replies`" (it reads each reply thread and routes it: stage, suppression, nurture date, booking draft)
+- **Replies waiting** — Stage `Replied` (routed there by `/lead-replies`). → book the discovery call (`clients/<client>/offer.md` Pricing method §1); a booking-link draft may already be in Gmail. Once the time is set, move the lead to `Call Booked` with an expected `deal_value` (`/lead-replies` > When the call gets booked)
 - **Calls booked** — Stage `Call Booked`. → after the call, paste notes into the record, run `/lead-proposal`
 - **Proposals to chase** — Stage `Proposal Sent`, `Next Action Date` ≤ today
 - **Due for a touch** — Stage `Qualified`, or `Contacted` + `Next Action Date` ≤ today + <5 emails in `Activity Log`. → "run `/lead-outreach`"

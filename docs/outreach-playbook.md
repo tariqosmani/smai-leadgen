@@ -59,8 +59,19 @@ answers the client's stated problem first, cites the closest portfolio build, en
 
 ## After a reply
 
-Out of scope for automation. `/lead-pipeline` surfaces it; the founder runs the discovery call per
-`clients/<client>/offer.md` Pricing method §1, logs notes in the record, then `/lead-proposal` drafts the 3-option proposal.
+The cadence stops on any reply. `/lead-replies` does the triage: for each `Contacted` lead it reads
+the reply thread, classifies it (`interested`, `not-now`, `not-interested`, `unsubscribe`,
+`auto-reply`, `referral`, `bounce`), and routes the lead via the pipeline adapter (stage move, nurture
+or retry date, and the suppression list for unsubscribes). It appends a dated line
+`YYYY-MM-DD: reply received, <class>, <gist>` (or `unsubscribe, suppressed` / `bounce, <reason>` /
+`auto-reply, retry <date>`). It **never answers a reply**. When an interested prospect proposes a time
+or asks how to book, it leaves a Gmail **draft** offering the client's `booking_url` or concrete
+slots, for the founder to send.
+
+The founder then takes every conversation. `/lead-pipeline` surfaces the `Replied` leads; the founder
+runs the discovery call per `clients/<client>/offer.md` Pricing method §1, logs notes in the record,
+moves the lead to `Call Booked` with an expected `deal_value`, then `/lead-proposal` drafts the
+3-option proposal.
 
 ## Logging (every send)
 

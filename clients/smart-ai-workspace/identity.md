@@ -22,6 +22,16 @@ for the Google Doc title.
 `from-email` is the connected Gmail account's actual send identity. Outreach is signed
 as the founder name above (Phase 3 autonomous send, see CLAUDE.md > Guardrails).
 
+## Booking
+
+Used by `/lead-replies` when a prospect who replied wants to schedule the discovery
+call. Optional, and not required by `scripts/check_client.py`.
+
+- **booking_url:** https://cal.com/REPLACE-ME/discovery-call
+
+Placeholder, fill this in with Tariq's real scheduling link. Left as a placeholder or
+blank, `/lead-replies` drafts 2 to 3 concrete time slots instead of a link.
+
 ## CRM target
 
 Which pipeline store the skills read and write, via the adapter for this value

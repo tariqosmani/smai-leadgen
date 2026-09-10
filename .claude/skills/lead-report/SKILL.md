@@ -7,6 +7,8 @@ description: "Weekly client-facing performance summary for the active client's o
 
 > Invoke with `/lead-report` (weekly, client-facing) or "run the weekly report". A reporting layer on top of `/lead-pipeline`, not a funnel stage. `/lead-pipeline` is the internal daily driver; `/lead-report` is the external weekly scorecard.
 
+Sending-infrastructure health (bounce rate, auth, blocklist, deliverability verdict) is covered by `/deliverability-monitor`, not re-derived here. This report is about pipeline performance, not inbox health.
+
 ## Client config
 Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_CLIENT` in `.env`. Then read:
 - `clients/<client>/identity.md`: business name + founder name (Doc title and branding), `crm_target`

@@ -27,7 +27,7 @@ else is written when known.
 | `channel` | enum | `email + linkedin` / `email` / `linkedin` / `upwork` |
 | `industry` | slug | `real-estate` `e-commerce` `manufacturing` `marketing-agencies` `logistics` `saas` `other` |
 | `email` | email | contact work email |
-| `email_status` | enum | `valid` / `catchall` / `unknown` |
+| `email_status` | enum | `valid` / `catchall` / `unknown` / `invalid`. Set by `/lead-find` after enrichment (`scripts/verify_email.py`) and re-checked by `/lead-outreach` before every email send. `invalid` never gets an email. See `docs/email-verification.md`. |
 | `linkedin_url` | url | the contact's profile |
 | `company_domain` | text | bare domain, no scheme. **The dedupe key.** (Airtable field name: `Company Website`) |
 | `company_linkedin_url` | url | |

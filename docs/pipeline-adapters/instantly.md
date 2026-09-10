@@ -39,7 +39,7 @@ statuses.
 | `channel` | `custom_variables.channel` | Instantly is email-only; `linkedin` leads should not go here |
 | `industry` | `custom_variables.industry` | |
 | `email` | `email` | the lead key in Instantly |
-| `email_status` | `custom_variables.email_status` | Instantly also runs its own verification |
+| `email_status` | `custom_variables.email_status` | `valid` / `catchall` / `unknown` / `invalid`. Instantly verifies every lead on import, so `/lead-find` can skip its own `scripts/verify_email.py` step for an `instantly` client and read Instantly's result back instead (`docs/email-verification.md`). |
 | `linkedin_url` | `custom_variables.linkedin_url` | |
 | `company_domain` | `website` | Instantly stores it as the website URL |
 | `company_linkedin_url` | `custom_variables.company_linkedin_url` | |

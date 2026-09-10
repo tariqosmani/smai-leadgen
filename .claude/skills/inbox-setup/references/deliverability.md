@@ -1,8 +1,10 @@
 # Deliverability reference
 
-Sizing rules, DNS record templates, warmup schedule, and monitoring thresholds for
-`/inbox-setup`. `scripts/inbox_math.py` encodes the sizing math; this file is the
-source it is derived from.
+Sizing rules, DNS record templates, warmup schedule, and monitoring thresholds.
+`/inbox-setup` uses all of it to stand the infrastructure up once; `/deliverability-monitor`
+reuses the DNS templates, the DMARC tighten path, and the Monitoring thresholds table on
+every recurring health check. `scripts/inbox_math.py` encodes the sizing math; this file is
+the source it is derived from.
 
 ## Sizing rules (2026 consensus)
 
@@ -154,3 +156,12 @@ Check weekly for the first month, then monthly.
 
 On a pause: stop campaign sends for that domain, keep warmup running, fix the cause
 (list hygiene, content, auth), resume at 50% volume for 3 days, then full.
+
+### Monitoring (ongoing)
+
+`/deliverability-monitor` runs this table on a schedule. It maps the columns to a verdict:
+**Healthy = GREEN** (keep sending), **Warning = YELLOW** (cut volume, extend warmup, tighten
+targeting), **Pause sending = RED** (the "On a pause" path above). The verdict is the worst
+column any single metric lands in. No new thresholds: the numbers above are the only ones.
+Advance the DMARC policy (`p=none` -> `quarantine` -> `reject`, see the DMARC template) only
+after a clean, aligned stretch at the current policy.
