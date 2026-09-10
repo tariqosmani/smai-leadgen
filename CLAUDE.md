@@ -31,6 +31,8 @@ The skill then reads `clients/<slug>/`:
 
 **Onboard a new client:**
 
+**Fastest path:** run `/client-intake <slug>` for a guided interview that writes all five files and validates them. Or by hand:
+
 1. `cp -r clients/smart-ai-workspace clients/<new-slug>` (or create the five files by hand).
 2. Edit all five files for the new business. `identity.md` first: name, founder, sending identity, `crm_target` (+ base/table if `airtable`, else the `.env` var names).
 3. Set `ACTIVE_CLIENT=<new-slug>` in `.env`, or pass `client=<new-slug>` per run.
@@ -44,16 +46,18 @@ Global guardrails (below) are inherited automatically. Do not copy them into the
 
 | # | Stage | Skill | Does |
 |---|-------|-------|------|
-| 1 | Source + qualify | `/lead-find` | Explorium/Vibe Prospecting: find decision-makers by title + industry + intent → enrich email + LinkedIn → verify email (`docs/email-verification.md`, invalids never reach outreach) → dedupe → ICP score → hook → create lead records via the pipeline adapter |
+| 1 | Source + qualify | `/lead-find` | Explorium/Vibe Prospecting: find decision-makers by title + industry + intent → enrich email + LinkedIn → verify email (`docs/email-verification.md`, invalids never reach outreach) → dedupe → ICP score → hook → create lead records via the pipeline adapter. Detects buying-signal events (funding, job change, hiring spike, tech-stack) and auto-fills the Signal field. |
 | 2 | Outreach | `/lead-outreach` | send email (autonomous, signed as the client's founder) / draft LinkedIn text, follow-up cadence, log touches on the record. Sends via the adapter's campaign when the adapter owns sending. |
 | 2.5 | Triage replies | `/lead-replies` | read each Contacted lead's reply thread, classify it (interested / not-now / not-interested / unsubscribe / auto-reply / referral / bounce), route via the adapter (stage, nurture or retry date, suppression list); draft a booking reply for the founder to send. Never auto-answers. Companion to stage 3. |
 | 3 | Manage | `/lead-pipeline` | daily action list, stale/cold flags, stage counts + conversion rates |
 | 4 | Convert | `/lead-proposal` | discovery notes → 3-option fixed-scope proposal in a Google Doc |
 | 5 | Upwork | `/upwork-proposal` | job post → fit check → short tailored proposal → log as `channel=upwork` |
 
+`/lead-import` feeds stage 1 from a CSV of already-known contacts instead of cold sourcing: a warm list, or a website visitor de-anonymization export (`docs/visitor-deanonymization.md`).
+
 Typical day: `/lead-pipeline` → do what it says (usually `/lead-outreach` or `/lead-replies`, sometimes `/lead-find` to refill the top).
 
-Three skills sit outside the funnel, in the ops-health area. `/inbox-setup` stands up cold-email sending infrastructure (domains, mailboxes, SPF/DKIM/DMARC, warmup, rotation) once per client at onboarding. `/deliverability-monitor` is the recurring companion to it: run weekly or when reply rates drop, it re-checks bounce rate, auth + DNS drift, blocklist status, and the reply-rate trend against the thresholds in `.claude/skills/inbox-setup/references/deliverability.md` and returns a GREEN / YELLOW / RED verdict. Read-only on the pipeline and DNS; appends one line to `clients/<slug>/infrastructure.md`. `/lead-report` builds a weekly client-facing scorecard (a branded Google Doc plus a one-time Airtable Interface dashboard) from the same pipeline-adapter metrics as `/lead-pipeline`. It is read-only on the pipeline and honest about untracked metrics (Gmail sends have no open or click tracking).
+Four skills sit outside the funnel, in the ops-health area. `/inbox-setup` stands up cold-email sending infrastructure (domains, mailboxes, SPF/DKIM/DMARC, warmup, rotation) once per client at onboarding. `/deliverability-monitor` is the recurring companion to it: run weekly or when reply rates drop, it re-checks bounce rate, auth + DNS drift, blocklist status, and the reply-rate trend against the thresholds in `.claude/skills/inbox-setup/references/deliverability.md` and returns a GREEN / YELLOW / RED verdict. Read-only on the pipeline and DNS; appends one line to `clients/<slug>/infrastructure.md`. It also takes an inbox-placement score (arg, Instantly analytics, or a seed test) and treats below 90% as RED. `/lead-report` builds a weekly client-facing scorecard (a branded Google Doc plus a one-time Airtable Interface dashboard) from the same pipeline-adapter metrics as `/lead-pipeline`. It is read-only on the pipeline and honest about untracked metrics (Gmail sends have no open or click tracking). White-label mode (agency resale) swaps in the end-client branding and removes vendor mentions. `/lead-signals` re-scans the existing pipeline for fresh buying signals and re-activates leads whose situation changed; credit-gated like /lead-find.
 
 ## Data store
 
@@ -73,10 +77,14 @@ email also sends through the Instantly campaign instead of Gmail (see the adapte
 | Area | Doc |
 |---|---|
 | Active-client model + onboarding | this file > Active client |
+| Client onboarding interview | `.claude/skills/client-intake/SKILL.md` |
 | Pipeline operations + lead fields (target-neutral) | [docs/pipeline-contract.md](docs/pipeline-contract.md) |
 | CRM adapters (airtable, instantly, hubspot, gohighlevel) | [docs/pipeline-adapters/](docs/pipeline-adapters/) |
 | Table fields, stages, dedupe rule (Airtable) | [docs/pipeline-schema.md](docs/pipeline-schema.md) |
 | Channels, cadence tables, hard voice rules | [docs/outreach-playbook.md](docs/outreach-playbook.md) |
+| Buying-signal catalog + Explorium event mapping | docs/signal-catalog.md |
+| Website visitor de-anonymization add-on | docs/visitor-deanonymization.md |
+| LinkedIn: manual vs automated (HeyReach) | docs/linkedin-automation.md |
 | Cold-email infra: sizing, DNS auth, warmup, deliverability thresholds | `.claude/skills/inbox-setup/references/deliverability.md` |
 | Weekly client report: metric definitions + dashboard spec | `.claude/skills/lead-report/references/metrics.md` |
 | Inbound reply triage: the 7 classes + routing | `.claude/skills/lead-replies/references/classification.md` |
@@ -97,8 +105,8 @@ These apply to **every** client, regardless of what `clients/<slug>/voice.md` sa
 - **Dedupe:** before creating any lead record, normalize the company website (`scripts/normalize.py`) and search the CRM (for Airtable: `filterByFormula` on `{Company Website}`). Never create a second record for a company already in the pipeline. Pass a prior `/lead-find` run's Explorium `dataset_id` as `exclude_key` to skip already-seen prospects.
 - **Credits:** Explorium contact enrichment costs ~3 credits per lead. `/lead-find` always shows the estimate and waits for a yes before `export-to-csv`. It reports credits spent + remaining.
 - **Infrastructure spend:** `/inbox-setup` is the only skill that buys anything (sending domains, via the Hostinger MCP). It never purchases without an explicit in-session yes to an itemized total, mirroring the `/lead-find` credit gate. The Hostinger account has a default payment method, so a purchase call charges immediately: the gate is hard.
-- **Deliverability:** a **RED** verdict from `/deliverability-monitor` pauses campaign email sends for the affected sending domain(s) until the cause is fixed (warmup keeps running). `/lead-outreach` does not send for a client whose last recorded verdict in `clients/<slug>/infrastructure.md` is RED. YELLOW means cut volume, do not stop.
-- **Intern Rule:** email outreach is drafted and sent by the system on the founder's behalf, signed as the client's founder (Phase 3, see Bike Method above). LinkedIn is ToS-sensitive: the system outputs paste-ready text and the founder sends it by hand. Every reply is human — the cadence stops on any reply and the founder takes the conversation. `/lead-replies` classifies and routes every inbound reply (stage move, suppression, nurture date) but never answers one; a reply that needs a booking link is left as a Gmail draft for the founder to send.
+- **Deliverability:** a **RED** verdict from `/deliverability-monitor` pauses campaign email sends for the affected sending domain(s) until the cause is fixed (warmup keeps running). `/lead-outreach` does not send for a client whose last recorded verdict in `clients/<slug>/infrastructure.md` is RED. YELLOW means cut volume, do not stop. An inbox-placement score below 90% is a RED signal and pauses sending for that domain.
+- **Intern Rule:** email outreach is drafted and sent by the system on the founder's behalf, signed as the client's founder (Phase 3, see Bike Method above). LinkedIn is ToS-sensitive: the system outputs paste-ready text and the founder sends it by hand. A client on `linkedin_mode: heyreach` instead gets a HeyReach-ready export, still founder-loaded, still human replies (`docs/linkedin-automation.md`). Every reply is human — the cadence stops on any reply and the founder takes the conversation. `/lead-replies` classifies and routes every inbound reply (stage move, suppression, nurture date) but never answers one; a reply that needs a booking link is left as a Gmail draft for the founder to send.
 - **Don't edit the sibling repos** (`../Smart_AI_Workspace_Website`, `../Tariq_Osmani_OS`) from here. Read only.
 
 ## Environment + connections

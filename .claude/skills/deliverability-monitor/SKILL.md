@@ -1,6 +1,6 @@
 ---
 name: deliverability-monitor
-description: "Recurring health check for the active client's cold-email sending infrastructure, run weekly or whenever reply rates drop. Reads what /inbox-setup provisioned (clients/<client>/infrastructure.md), then: counts bounce-backs against emails sent in the window (Gmail inbox scan for a Gmail-sending client, campaign analytics for an Instantly client), re-checks SPF / DKIM / DMARC / MX on every sending domain against the templates in inbox-setup/references/deliverability.md, checks each sending domain against the public DNSBLs with scripts/dnsbl_check.py, compares this window's reply rate to the prior window, and returns a GREEN / YELLOW / RED verdict with specific next actions and a DMARC tightening recommendation. Read-only on the pipeline and on DNS. Appends one dated line to infrastructure.md. Companion to /inbox-setup (the one-time build) and /lead-report (the weekly client scorecard); not a funnel stage. Spam-complaint rate on a Gmail send is not tracked and is never estimated."
+description: "Recurring health check for the active client's cold-email sending infrastructure, run weekly or whenever reply rates drop. Reads what /inbox-setup provisioned (clients/<client>/infrastructure.md), then: counts bounce-backs against emails sent in the window (Gmail inbox scan for a Gmail-sending client, campaign analytics for an Instantly client), re-checks SPF / DKIM / DMARC / MX on every sending domain against the templates in inbox-setup/references/deliverability.md, checks each sending domain against the public DNSBLs with scripts/dnsbl_check.py, compares this window's reply rate to the prior window, and returns a GREEN / YELLOW / RED verdict with specific next actions and a DMARC tightening recommendation. Also takes an inbox-placement score (a placement=NN arg, Instantly analytics, or a seed test) and treats below 90% as RED. Read-only on the pipeline and on DNS. Appends one dated line to infrastructure.md. Companion to /inbox-setup (the one-time build) and /lead-report (the weekly client scorecard); not a funnel stage. Spam-complaint rate on a Gmail send is not tracked and is never estimated."
 ---
 
 # Deliverability Monitor
@@ -42,14 +42,14 @@ Args: `since=YYYY-MM-DD` or `days=N` set the window start. `client=<slug>`.
   - `mcp__claude_ai_Gmail__search_threads` with `from:mailer-daemon OR subject:"Delivery Status Notification" OR subject:"Undelivered Mail Returned to Sender" OR subject:"Delivery incomplete"` and `after:<since>`.
   - Count distinct bounce-back messages. `bounce_rate = bounces / emails_sent`.
   - **Spam-complaint rate: `not tracked (Gmail send)`.** Never estimate it, never infer it from replies or bounces.
-  - Inbox placement / warmup health score: only if the client runs a seed test or a warmup tool; otherwise `not tracked (Gmail send)`.
+  - Warmup health score: only if the client runs a warmup tool that exposes one; otherwise `not tracked (Gmail send)`. Inbox placement is its own step, step 6.
 - **Instantly client:** from `analytics/overview` for the window: `bounce_rate = bounced_count / contacted_count`, `complaint_rate` from the complaint field if present, plus `open_count`, `reply_count`. These are reliable, use them directly.
 - Report each rate with the band it falls in per `deliverability.md` > Monitoring thresholds (do not restate the numbers, cite the row).
 
 ### 3. Auth + DNS re-check (per sending domain, READ-ONLY)
 `mcp__hostinger-dns__DNS_getDNSRecordsV1` for each sending domain, then compare to `deliverability.md` > DNS record templates for the client's mailbox provider:
 - **SPF:** exactly one TXT on `@`, `v=spf1`, the correct `include:` for the provider, ends `~all`. Flag: missing, more than one SPF record, wrong include, `-all`/`+all`.
-- **DMARC:** one TXT on `_dmarc`, has a `p=` policy. Record the current policy (`none` / `quarantine` / `reject`) for step 7.
+- **DMARC:** one TXT on `_dmarc`, has a `p=` policy. Record the current policy (`none` / `quarantine` / `reject`) for step 8.
 - **DKIM:** the provider's record present (`google._domainkey` TXT for Google Workspace; selector CNAMEs for M365 / a cold-email provider).
 - **MX:** matches the provider's expected host(s) and priority.
 - **Redirect:** the sending domain still 301s to the primary site (a bare sending domain is a spam signal).
@@ -69,20 +69,30 @@ Reuse the `/lead-pipeline` step 4 method (Activity Log timestamps), scoped to th
 - **A sharp reply-rate drop with send volume roughly flat is a deliverability signal even when bounce looks clean** (mail is landing in spam). Treat a drop of more than about a third, volume flat, as at least YELLOW.
 - Denominator under 3 either window: show the raw count, not a percentage.
 
-### 6. Verdict
-Take the **worst** signal across steps 2 to 5, mapped through `deliverability.md` > Monitoring thresholds (Healthy = GREEN, Warning = YELLOW, Pause sending = RED):
+### 6. Inbox-placement score
+One number: the share of campaign-style sends landing in the inbox, not spam. Source, in order:
+- **`placement=NN` arg** - a seed-test result the operator ran and passed in. Use it as given.
+- **Instantly client** - the campaign / mailbox deliverability score from Instantly analytics.
+- **Gmail-sending client, no arg** - `not tracked (Gmail send)`. Prompt once:
+  `run a seed test for a real number, see inbox-setup/references/deliverability.md > Inbox-placement test`.
+
+Where a number exists, band it through `deliverability.md` > Monitoring thresholds, the "Inbox placement" row: **above 90% GREEN, 80 to 90% YELLOW, below 90% RED (pause sending)**. `not tracked` cannot raise or lower the verdict, note that it is unmeasured.
+
+### 7. Verdict
+Take the **worst** signal across steps 2 to 6, mapped through `deliverability.md` > Monitoring thresholds (Healthy = GREEN, Warning = YELLOW, Pause sending = RED):
 - **Bounce rate** -> its band in the thresholds table.
 - **Spam-complaint rate** -> its band (Instantly only; `not tracked` for Gmail, so it cannot raise the verdict, note that).
 - **Auth (SPF + DKIM + DMARC all pass)** -> any fail is the Pause column: RED.
 - **Blocklist** -> any confirmed `LISTED` on a sending domain: RED.
 - **Reply-rate drop with flat volume** -> YELLOW (RED only if it coincides with a bounce or auth problem).
-- **Warmup health / inbox placement** -> its band, where the client tracks it.
+- **Inbox placement** -> its band per the "Inbox placement" row: below 90% is the Pause column, RED. `not tracked` does not affect the verdict.
+- **Warmup health score** -> its band, where the client tracks it.
 
 - **GREEN:** keep sending at current volume.
 - **YELLOW:** slow down. Cut campaign volume (roughly halve it), extend warmup, tighten targeting / list hygiene, fix the flagged item, re-check in a few days.
 - **RED:** pause campaign sends for the affected domain(s), keep warmup running, fix the cause (list hygiene, content, auth, delisting), resume at 50% for 3 days, then full. This mirrors `deliverability.md` > "On a pause".
 
-### 7. Output
+### 8. Output
 A short status block, then the verdict and actions:
 
 ```
@@ -91,6 +101,7 @@ Sending: {N} domain(s) [list], {M} mailboxes, {provider}. Warmup finished {date 
 Volume:   {sent} emails sent in window ({first-touch}/{follow-up})
 Bounce:   {x.x}% ({bounces}/{sent})  [GREEN|YELLOW|RED per thresholds]
 Complaints: not tracked (Gmail send)   |   {x.x}%  [band]   (Instantly)
+Placement: {NN}%  [GREEN|YELLOW|RED per thresholds]   |   not tracked (Gmail send)
 Auth:     per domain - SPF {ok|DRIFT} / DKIM {ok|DRIFT} / DMARC p={policy} / MX {ok|DRIFT}
 Blocklist: {clean | LISTED on <list> for <domain>}
 Reply rate: {this}% vs {prior}% ({+/-} pts)   [or "first check, no trend"]
@@ -103,11 +114,11 @@ DMARC: currently p={policy on each domain}. {recommendation, see below}
 
 **DMARC progression recommendation** (cite `deliverability.md` > DMARC): advance one step only, `p=none` -> `p=quarantine` -> `p=reject`, and only after **2+ weeks of clean, aligned traffic** (SPF + DKIM passing on every send, bounce in the healthy band, no blocklist hit). If this check is GREEN and the domain has held clean for 2+ weeks at the current policy, recommend the next step and note that `/inbox-setup` applies it. Otherwise: hold at the current policy and say why.
 
-### 8. Log
+### 9. Log
 Append one line to `clients/<client>/infrastructure.md` under a `## Deliverability checks` heading (add the heading at the end of the file if it is missing):
 
 ```
-- {until} (since {since}): sent {n}, bounce {x.x}%, complaints {x.x}% or "n/t", reply rate {x}% ({+/- pts} or "n/a"), auth {all pass | DRIFT: ...}, blocklist {clean | LISTED ...}, verdict {GREEN|YELLOW|RED}. Actions: {one line}.
+- {until} (since {since}): sent {n}, bounce {x.x}%, complaints {x.x}% or "n/t", placement {NN}% or "n/t", reply rate {x}% ({+/- pts} or "n/a"), auth {all pass | DRIFT: ...}, blocklist {clean | LISTED ...}, verdict {GREEN|YELLOW|RED}. Actions: {one line}.
 ```
 
 This line is the next run's prior baseline. No em dashes. **Nothing else is written: not the pipeline, not DNS.**
@@ -120,7 +131,7 @@ This line is the next run's prior baseline. No em dashes. **Nothing else is writ
 Re-running for the same window appends another dated line with the same numbers and creates no other change. Safe to re-run. Remove a duplicate line by hand if needed.
 
 ## Guardrail
-A **RED** verdict means campaign sends pause for the affected domain(s) until the cause is fixed (CLAUDE.md > Guardrails). Warmup keeps running. `/lead-outreach` should not send for that client while the last recorded verdict is RED.
+A **RED** verdict means campaign sends pause for the affected domain(s) until the cause is fixed (CLAUDE.md > Guardrails). Warmup keeps running. `/lead-outreach` should not send for that client while the last recorded verdict is RED. An inbox-placement score below 90% is a RED signal on its own and pauses sending for the affected domain(s), same as a bounce or auth failure.
 
 ## Delegate (optional)
 Whether cold email is still the right motion for this client, or a deeper channel-strategy rethink after a sustained RED: `sales-outbound-strategist`.

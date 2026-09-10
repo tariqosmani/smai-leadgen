@@ -24,6 +24,17 @@ across the skills):
 | Data pipelines | `data` | scattered spreadsheets and exports unified into one reliable source |
 | AI agent development | `agents` | document-grounded assistants, classifiers, autonomous task agents |
 
+### Retainer add-ons
+
+Sold on top of an existing engagement, not as standalone builds. Priced from the real
+monthly effort plus any tool subscription (in the client's name), the same way
+maintenance is priced (Pricing method section 7).
+
+| Add-on | slug | What it covers |
+|---|---|---|
+| Website visitor de-anonymization | `visitor-deanon` | A tracking tool (RB2B-class) resolves anonymous site visitors to a person or company; the resolved contacts enter the pipeline as warm intent leads via `/lead-import`. Retainer covers the tool, the import runs, and outreach on the results. See `docs/visitor-deanonymization.md`. |
+| Managed LinkedIn automation | `linkedin-managed` | `/lead-outreach`'s LinkedIn cadence run through a HeyReach-class tool instead of manual sending. Default stays `manual` (paste-ready text the founder sends, fully ToS-safe); `heyreach` mode is the opt-in and the client accepts LinkedIn's automation-ban risk. See `docs/linkedin-automation.md`. |
+
 ## Portfolio proof points
 
 Condensed from `../Tariq_Osmani_OS/references/upwork-catalog/`. Full source of truth lives there —

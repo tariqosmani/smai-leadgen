@@ -1,6 +1,6 @@
 ---
 name: lead-report
-description: "Weekly client-facing performance summary for the active client's outbound program. Sets a window (default last 7 days), pulls activity and pipeline metrics via the pipeline adapter (report_metrics + list_leads, plus Instantly campaign analytics for an instantly client), computes week-over-week deltas, reply and conversion rates, and pipeline value, writes a short plain-language narrative with one recommended focus for next week, and produces a branded Google Doc scorecard plus a one-time Airtable Interface spec for a live dashboard. Read-only on the pipeline. Honest about untracked metrics: Gmail sends have no open or click tracking and are never estimated."
+description: "Weekly client-facing performance summary for the active client's outbound program. Sets a window (default last 7 days), pulls activity and pipeline metrics via the pipeline adapter (report_metrics + list_leads, plus Instantly campaign analytics for an instantly client), computes week-over-week deltas, reply and conversion rates, and pipeline value, writes a short plain-language narrative with one recommended focus for next week, and produces a branded Google Doc scorecard plus a one-time Airtable Interface spec for a live dashboard. Read-only on the pipeline. Honest about untracked metrics: Gmail sends have no open or click tracking and are never estimated. White-label mode (identity.md white_label: true) rebrands the Doc for an agency reselling the service, end-client branding in, every vendor and tooling mention out."
 ---
 
 # Lead Report
@@ -11,7 +11,7 @@ Sending-infrastructure health (bounce rate, auth, blocklist, deliverability verd
 
 ## Client config
 Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_CLIENT` in `.env`. Then read:
-- `clients/<client>/identity.md`: business name + founder name (Doc title and branding), `crm_target`
+- `clients/<client>/identity.md`: business name + founder name (Doc title and branding), `crm_target`, and the `## White-label` block if present (`white_label`, `agency_name`, `end_client_name`, `prepared_by`, `logo_url`)
 - `clients/<client>/voice.md`: register for the narrative
 - `clients/<client>/scoring.md`: ICP bands, only if a by-band line is shown
 
@@ -19,7 +19,7 @@ Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_C
 - `docs/pipeline-contract.md`: the operations (`report_metrics`, `list_leads`) and the normalized lead fields
 - `docs/pipeline-adapters/<crm_target>.md`: how those operations map for this client
 - `.claude/skills/lead-pipeline/SKILL.md` **step 4**: the stage-count and conversion-rate method this skill reuses. Do not re-derive it, scope the same method to the report window.
-- `references/metrics.md` (this skill): the exact definition and per-adapter derivation of every metric, the "not tracked" rules, the Deal Value handling, and the Airtable Interface spec.
+- `references/metrics.md` (this skill): the exact definition and per-adapter derivation of every metric, the "not tracked" rules, the Deal Value handling, the White-label mode swap, and the Airtable Interface spec.
 
 ## Config
 Metrics come from the **pipeline adapter** for the active client's `crm_target` (`clients/<client>/identity.md`): `report_metrics(since)` + `list_leads`, mapped in `docs/pipeline-adapters/<crm_target>.md`. For `smart-ai-workspace` that is `airtable` (Airtable MCP `mcp__airtable__*`, base + table from `identity.md`).
@@ -57,6 +57,8 @@ Honest: real numbers only, no projection stated as a result, name anything not t
 `mcp__claude_ai_Google_Drive__create_file`:
 - `title`: `{business name} - Outbound Report - week of {since as "Mon D, YYYY"}`
 - `textContent`: the report body below. `contentMimeType: "text/markdown"` (converts to a Google Doc).
+
+**White-label mode:** if `identity.md` has `white_label: true`, apply the swap in `references/metrics.md` > White-label mode: the title and header use `end_client_name`, add a "Prepared by {prepared_by}, {agency_name}" line under the header, place `logo_url` if set, and remove every mention of the vendor, the tooling, and the business name from the Doc. Narrative voice, metrics, and honesty rules are unchanged. Absent or `false` is exactly the default behavior below.
 
 Sections in order:
 1. **Summary** - the narrative, plus a 4-number headline: emails sent, replies, meetings booked, pipeline value.

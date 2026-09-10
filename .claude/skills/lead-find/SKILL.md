@@ -1,6 +1,6 @@
 ---
 name: lead-find
-description: "Source and qualify B2B prospects for the active client. Uses the Explorium / Vibe Prospecting MCP to find decision-makers in the client's ICP industries (filtered by title, seniority, company size, country, hiring events, buying intent), enriches their work email + LinkedIn URL, dedupes against the active client's pipeline, scores each 0-100 against the client's ICP rubric, writes a prospect-specific hook, and creates one lead record per prospect via the pipeline adapter. Explorium contact enrichment costs credits (~3 per lead) - always confirm the estimate before exporting."
+description: "Source and qualify B2B prospects for the active client. Uses the Explorium / Vibe Prospecting MCP to find decision-makers in the client's ICP industries (filtered by title, seniority, company size, country, hiring events, buying intent), enriches their work email + LinkedIn URL, dedupes against the active client's pipeline, scores each 0-100 against the client's ICP rubric, writes a prospect-specific hook, and creates one lead record per prospect via the pipeline adapter. Detects buying-signal events (funding, decision-maker job change, hiring spike, tech-stack adoption, buying intent) during sourcing and auto-fills the Signal field per docs/signal-catalog.md. Explorium contact enrichment costs credits (~3 per lead) - always confirm the estimate before exporting."
 bike-method-phase: 2
 ---
 
@@ -19,6 +19,7 @@ Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_C
 ## Read first
 - `docs/pipeline-contract.md`: the target-neutral operations and lead fields
 - `docs/pipeline-schema.md`: field reference (Airtable layout, dedupe rule)
+- `docs/signal-catalog.md`: buying-signal events, the `signals=` arg mapping, the `signal` string templates
 - `docs/email-verification.md`: the verify step, the `email_status` values, free vs paid
 - `scripts/normalize.py`: dedupe helper
 - `scripts/verify_email.py`: email verification helper (free tier)
@@ -34,12 +35,13 @@ through the **Vibe Prospecting MCP** (`mcp__claude_ai_Vibe_Prospecting__*`), no 
 - prospect fetch / base row: ~1 credit each on export
 - email enrichment: ~2 credits each
 - LinkedIn URL: free, included in the base record
+- signal events (`signals=` runs): preview free, event columns may add a small amount to the export; it lands in the same step-3 estimate, not a second charge
 - **~3 credits per fully-contactable lead.** Check `remaining_user_credits` in export responses; `/lead-find` stops and reports if a batch would exceed what's left.
 
 ## Steps
 
 ### 1. Pick the segment
-Default arg: an industry from `clients/<client>/icp.md` (`/lead-find marketing-agencies`). Also accept `count=25`, `intent=true`, `hiring=ops`, `client=<slug>`.
+Default arg: an industry from `clients/<client>/icp.md` (`/lead-find marketing-agencies`). Also accept `count=25`, `signals=<list>`, `client=<slug>`. `signals=` takes a comma list of `funding,job-change,hiring,tech-stack,intent` (`/lead-find marketing-agencies signals=funding,hiring`). Shorthands still work: `intent=true` = `signals=intent`, `hiring=<dept>` = `signals=hiring` scoped to that department.
 Map the industry to `linkedin_category` values via `autocomplete` (never pass raw text). Build filters:
 - `linkedin_category`: from autocomplete
 - `company_country_code` **and** `prospect_country_code`: `["US","CA"]`
@@ -47,14 +49,13 @@ Map the industry to `linkedin_category` values via `autocomplete` (never pass ra
 - `job_level`: `["owner","founder","c-suite","partner"]` (add `director` + `job_department: ["operations"]` for larger targets)
 - `has_contact_details`: `{"value":"email"}`
 - **`max_per_company`: 2** — outbound wants 1–2 contacts per company, not a whole org chart
-- when `intent=true`: add `business_intent_topics` (autocomplete "marketing automation", "workflow automation", "AI automation") — these leads get the full intent score in `clients/<client>/scoring.md`
-- when `hiring=<dept>`: add `events` `["hiring_in_operations_department","increase_in_operations_department"]`, `last_occurrence: 90`
+- for each value in `signals=`: add the Explorium filter from `docs/signal-catalog.md` > Catalog. `intent` -> `business_intent_topics` (autocomplete the offer's topics); `hiring` -> `events` `hiring_in_<dept>_department` + `increase_in_<dept>_department`, `last_occurrence: 90`; `funding` -> `events` `new_funding_round,new_investment,ipo_announcement`, `last_occurrence: 90`; `job-change` -> `current_role_months: {"lte": 6}`; `tech-stack` -> `company_tech_stack_tech` (autocomplete the tool). The `events` filter is businesses-only: fetch businesses with it first, then refine to prospects via `businesses_reference_table`. Signal-bearing leads auto-earn the timing/intent points in `clients/<client>/scoring.md`.
 
 ### 2. Fetch + review (free)
 `fetch-entities` (entity_type `prospects`) → `show-sample`. Present the sample to Tariq. Confirm the segment looks right before spending anything. Bad fit → adjust filters, re-fetch (still free).
 
 ### 3. Enrich + export (costs credits)
-`enrich-prospects` with `["enrich-prospects-contacts"]`, `contact_types: ["email"]` → returns the new `table_name` + a cost estimate. Show the estimate. On Tariq's go, `export-to-csv` (pass a prior run's `dataset_id` as `exclude_key` to skip already-seen prospects). Download `_full_download_url`.
+`enrich-prospects` with `["enrich-prospects-contacts"]`, `contact_types: ["email"]` → returns the new `table_name` + a cost estimate. When `signals=` was set, also pull the matching event table now (`fetch-businesses-events` on the companies, `fetch-prospects-events` on the prospects, keys per `docs/signal-catalog.md`); the event preview is free and its columns ride the same `export-to-csv`, so its cost is already inside this one estimate. Show the estimate. On Tariq's go, `export-to-csv` (pass a prior run's `dataset_id` as `exclude_key` to skip already-seen prospects). Download `_full_download_url`. Demo / no-spend mode: this estimate + confirm is the only spend gate, event lookups included, nothing exports autonomously.
 
 ### 3b. Verify enriched emails (free)
 Scope: email verification only. Run `scripts/verify_email.py` on each enriched email
@@ -76,9 +77,10 @@ blank lines and lines starting with `#`; on an entry line read the token before 
 comment. These are `/lead-replies` unsubscribes and hard bounces, never re-source them.
 
 ### 5. Score + hook (Claude, per surviving row)
-- **ICP Score:** apply `clients/<client>/scoring.md`. Leads from an `intent`/`hiring` pull auto-earn the intent points.
+- **Signal:** from the event table pulled in step 3, compose the `signal` string per `docs/signal-catalog.md` template (funding / job-change / hiring / tech-stack / intent). Match businesses-events on the normalized company domain, prospects-events on the prospect. No matching event → leave `signal` empty (current behavior).
+- **ICP Score:** apply `clients/<client>/scoring.md`. Any signal-bearing lead (a `signals=` pull, or an event attached above) auto-earns the timing/intent points, per `docs/signal-catalog.md` > What a signal does downstream.
 - **Hard exclusion** (`clients/<client>/icp.md`: competitor, "AI" product company, former/board-only contact, generic inbox) → Stage `Disqualified`, still create the task (status complete) so it isn't re-sourced.
-- **Hook:** 1–2 sentences from their title + company focus + `prospect_skills` + any signal. Ties to one service line in `clients/<client>/offer.md`. No hype, no em dash.
+- **Hook:** 1–2 sentences from their title + company focus + `prospect_skills` + any signal. When a `signal` is present the hook leads with it (`docs/signal-catalog.md` > Hook angle). Ties to one service line in `clients/<client>/offer.md`. No hype, no em dash.
 - **Channel:** `email + linkedin` if both present, else whichever exists.
 - **Stage:** ≥60 `Qualified`, 40–59 `Nurture`, <40 `Disqualified`.
 - **`email_status: invalid` override** (step 3b): the lead must not flow to outreach. If it has a personal `linkedin_url`, keep the band Stage but set `channel` to `linkedin` (drop email) and `next_action` "email failed verification, LinkedIn only". If no LinkedIn, force Stage `Nurture`, `next_action` "needs a valid contact, re-enrich or find another decision-maker". Either way still create the record (company not re-sourced).

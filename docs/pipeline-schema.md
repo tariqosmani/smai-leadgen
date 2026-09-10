@@ -31,7 +31,7 @@ description blob.
 | Company Website | Single line text | bare domain, no scheme — **the dedupe key** |
 | Company LinkedIn | URL | |
 | Location | Single line text | |
-| Signal | Long text | hiring / funding / tech-stack / intent signal, if any |
+| Signal | Long text | buying-signal string (funding / job change / hiring / tech-stack / intent), auto-filled by `/lead-find` and `/lead-signals` per `docs/signal-catalog.md`. A short readable line, not raw event JSON |
 | Hook | Long text | the prospect-specific "why they need AI automation" line |
 | Next Action | Long text | the next step in words |
 | Next Action Date | Date (ISO `YYYY-MM-DD`) | when the next touch is due |

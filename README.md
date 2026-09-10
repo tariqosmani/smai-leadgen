@@ -47,6 +47,8 @@ clients/<slug>/
 
 **Onboard a new client:**
 
+Fastest path: `/client-intake <slug>` runs a guided interview that writes all five files and validates them. By hand:
+
 1. `cp -r clients/smart-ai-workspace clients/<new-slug>`
 2. Edit all five files for the new business (start with `identity.md`).
 3. `ACTIVE_CLIENT=<new-slug>` in `.env`, or pass `client=<new-slug>` on a single run
@@ -65,8 +67,11 @@ Global guardrails (no em dashes, no AI filler, honesty, dedupe, Bike Method auto
 
 | Command | When |
 |---------|------|
+| `/client-intake <slug>` | Onboarding a client. Guided interview that writes and validates `clients/<slug>/`. |
 | `/lead-pipeline` | Start of the workday. Tells you what to do next. |
 | `/lead-find marketing-agencies` | Top of funnel is thin. Sources + enriches + scores new leads (shows credit cost first). |
+| `/lead-import file=<csv>` | Ingest a warm list or a website visitor de-anonymization export instead of cold sourcing. |
+| `/lead-signals` | Re-scan the existing pipeline for fresh buying signals (funding, job change, hiring, tech-stack) and re-activate leads. Shows credit cost first. |
 | `/lead-outreach` | Draft + send the day's first-touches and follow-ups (batch of 10) via Gmail. |
 | `/upwork-proposal` | Paste an Upwork job post → tailored proposal. |
 | `/lead-proposal <company>` | After a discovery call → 3-option proposal as a Google Doc. |

@@ -176,6 +176,26 @@ Usage:
 - Degradation: if some but not all in-play leads have a value, sum what is present and note
   "n of m deals valued".
 
+## White-label mode
+
+For an agency reselling this outbound service to its own client, `clients/<client>/identity.md` can
+carry a `## White-label` block (`white_label`, `agency_name`, `end_client_name`, `prepared_by`,
+`logo_url`). When `white_label: true`, `/lead-report` changes only the Doc's branding, never its
+numbers:
+
+| Element | Default | White-label |
+|---|---|---|
+| Doc title | `{business name} - Outbound Report - week of {date}` | `{end_client_name} - Outbound Report - week of {date}` |
+| Header / branding | business name | `end_client_name`, plus `logo_url` if set |
+| Attribution line | none | `Prepared by {prepared_by}, {agency_name}` |
+| Vendor / tooling mentions | allowed | none: no "Smart AI Workspace", no tool or skill name, no "pipeline adapter", nothing that reveals how the report is produced |
+
+Unchanged: every metric and its derivation, the "not tracked" rules above, the honesty rules
+(`clients/<client>/offer.md` > What NOT to claim yet), and the narrative voice
+(`clients/<client>/voice.md`). Absent or `white_label: false` is exactly the standard behavior.
+The `report-log.md` line and the `/lead-report` chat report back to Tariq are internal and keep the
+real client slug either way.
+
 ## Airtable Interface spec (live dashboard, client sets up once)
 
 A read-only Airtable Interface on the `Lead Pipeline` table so the client can watch the pipeline

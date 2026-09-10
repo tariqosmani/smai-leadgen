@@ -10,9 +10,11 @@ tmp/
 *.log
 __pycache__/
 *.pyc
+.claude/worktrees/
 
 # lead data (keep the system, not the leads — real prospect PII, never push)
 data/*.json
 data/exports/
 data/*-export.csv
 data/clickup-leads-export.csv
+clients/*/linkedin-heyreach-*.csv

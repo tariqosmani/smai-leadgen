@@ -32,7 +32,7 @@ else is written when known.
 | `company_domain` | text | bare domain, no scheme. **The dedupe key.** (Airtable field name: `Company Website`) |
 | `company_linkedin_url` | url | |
 | `location` | text | |
-| `signal` | long text | hiring / funding / tech-stack / intent signal, if any |
+| `signal` | long text | buying-signal string, auto-filled by `/lead-find` and `/lead-signals` from `docs/signal-catalog.md` (funding / job change / hiring / tech-stack / intent). A short readable line, not raw event JSON. Empty when no event matched. |
 | `hook` | long text | the prospect-specific "why they need this" line |
 | `next_action` | long text | the next step in words |
 | `next_action_date` | ISO date `YYYY-MM-DD` | when the next touch is due |

@@ -157,6 +157,24 @@ Check weekly for the first month, then monthly.
 On a pause: stop campaign sends for that domain, keep warmup running, fix the cause
 (list hygiene, content, auth), resume at 50% volume for 3 days, then full.
 
+### Inbox-placement test (how to get the number)
+
+The "Inbox placement" row above needs a number from one of these. Cheapest first:
+
+- **Warmup tool score.** Instantly and Smartlead both show a per-mailbox deliverability / inbox
+  score from the warmup pool. Free, already running, read it in the tool. Good enough for the
+  weekly read.
+- **Seed test (GlockApps or MailReach).** Send one campaign-style email to their seed list and get
+  a per-provider inbox / spam / missing breakdown. GlockApps' free tier is a handful of tests
+  total and MailReach's is limited too, so use these for a monthly spot-check, not every week.
+- **Manual seed set.** Free. Keep 6 to 10 addresses across Gmail, Outlook, and Yahoo. Send them a
+  real campaign-style email from a sending mailbox, then check each one: inbox or spam.
+  placement = inbox count / total. Rough, but it catches a spam-folder problem the warmup score
+  can miss.
+
+Cadence: weekly for the first month after warmup, then monthly (same as the table caption above).
+Score the result against the "Inbox placement" thresholds in the table, do not invent new cut-offs.
+
 ### Monitoring (ongoing)
 
 `/deliverability-monitor` runs this table on a schedule. It maps the columns to a verdict:

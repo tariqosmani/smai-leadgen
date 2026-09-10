@@ -1,6 +1,6 @@
 ---
 name: lead-outreach
-description: "Draft and send first-touch + follow-up outreach for the active client's leads across email and LinkedIn. Reads Qualified / Contacted leads from the active client's pipeline (via the pipeline adapter), picks a cold-email framework (PAS, BAB, QVC, SCQ, 3C's, and others) and a personalization level per lead, drafts channel-appropriate messages in the client's voice from the lead's Hook + Signal, writes short internal-looking subject lines, sends the email via the Gmail MCP from the client's sending address (autonomous, signed as the client's founder) unless the adapter owns sending, outputs LinkedIn text for manual send, runs a 5-touch angle-rotated cadence, and updates the lead record (stage, activity log, next action date, next action). Supersedes the OS cold-email skill."
+description: "Draft and send first-touch + follow-up outreach for the active client's leads across email and LinkedIn. Reads Qualified / Contacted leads from the active client's pipeline (via the pipeline adapter), picks a cold-email framework (PAS, BAB, QVC, SCQ, 3C's, and others) and a personalization level per lead, drafts channel-appropriate messages in the client's voice from the lead's Hook + Signal, writes short internal-looking subject lines, sends the email via the Gmail MCP from the client's sending address (autonomous, signed as the client's founder) unless the adapter owns sending, outputs LinkedIn text for manual send (or a HeyReach-ready CSV when the client is on linkedin_mode: heyreach, see docs/linkedin-automation.md), runs a 5-touch angle-rotated cadence, and updates the lead record (stage, activity log, next action date, next action). Supersedes the OS cold-email skill."
 bike-method-phase: 3
 ---
 
@@ -13,7 +13,7 @@ bike-method-phase: 3
 Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_CLIENT` in `.env`. Then read:
 - `clients/<client>/voice.md`: the client's register
 - `clients/<client>/offer.md`: Portfolio proof points (the only proof you may cite)
-- `clients/<client>/identity.md`: business name, from-name / from-email / reply-to, CRM base + table
+- `clients/<client>/identity.md`: business name, from-name / from-email / reply-to, CRM base + table, `linkedin_mode` (`manual` default, or `heyreach`; see `docs/linkedin-automation.md`)
 
 ## Read first
 - `docs/outreach-playbook.md`: cadence table + the hard voice rules (apply to every client)
@@ -77,7 +77,8 @@ the campaign (if not already there) and the campaign sends the sequence, per
 - **email verification guard (hard, email channel only):** before any Gmail send, check the lead's `email_status`. If the `Activity Log` shows no prior verification, run `scripts/verify_email.py` now and write the result. `invalid` → **do not send**: `next_action` → "find new contact" (same as a bounce), `append_activity` `YYYY-MM-DD: email skipped, address <status> (<reason>)`, Stage unchanged, drop from this batch. `unknown` → send by default (note `unknown` in the logged line); `allow_unknown=false` → skip it exactly like `invalid`. `catchall` / `valid` → send, note the status in the log. Full rules: `docs/email-verification.md`.
 - **email touch 1:** `mcp__claude_ai_Gmail__send_message` (to, subject, body). Sends from the `from-email` in `clients/<client>/identity.md`. Capture the returned `threadId`.
 - **email follow-up:** `mcp__claude_ai_Gmail__send_message` with `replyThreadId` = the `threadId` from the record's `Activity Log` so it threads and keeps the subject.
-- **linkedin:** print the text + profile URL in a copy block. Connection note ≤ 300 chars, no link.
+- **linkedin:** `linkedin_mode: manual` (default) → print the text + profile URL in a copy block. Connection note ≤ 300 chars, no link. `linkedin_mode: heyreach` → do not print inline; add the lead to the HeyReach export batch (CSV row: name, linkedin_url, company, hook; plus each touch's message copy). Still no autonomous LinkedIn send. See `docs/linkedin-automation.md`.
+- **HeyReach batch (when `linkedin_mode: heyreach`):** after every lead in the run is processed, output the accumulated batch as one copy-paste CSV block (columns: name, linkedin_url, company, hook, touch_1 ... touch_4), or write it to `clients/<client>/linkedin-heyreach-<YYYY-MM-DD>.csv` (prospect PII, keep it local, do not commit it). Follow it with the steps to load the CSV into the client's HeyReach campaign. This replaces the inline LinkedIn paste blocks for the run; email sending is unchanged.
 
 ### 5. Update the lead record
 Per sent message, via the pipeline adapter: `set_stage` → `Contacted`; `update_lead` with
@@ -90,6 +91,7 @@ Verification-skipped (the step 4 email guard): that guard already wrote `next_ac
 
 ### 6. Report
 `4 emails SENT (Acme Co, Beta Inc, ...) · 2 queued (company contacted <7d) · 1 skipped (email invalid, needs new contact) · 2 LinkedIn texts below · follow-ups due <date>.`
+On `linkedin_mode: heyreach`, the LinkedIn part reads `· HeyReach CSV: 2 leads (load into the campaign)` instead of the inline texts.
 
 ## Idempotency
 Re-running the same day re-selects only records still due. Every send is logged via `append_activity` as `... touch N SENT (gmail thread ...)`, so a re-run reads the log first and never double-sends a touch.
