@@ -202,4 +202,6 @@ Ships with one live client, **smart-ai-workspace**. The pipeline runs in Airtabl
 
 I build systems like this one — sourcing, outreach, CRM, and reporting wired together as autonomous agent skills, not a pile of disconnected tools. If you want the same for your business:
 
-**[smartaiworkspace.tech](https://smartaiworkspace.tech)**
+- **Website:** [smartaiworkspace.tech](https://smartaiworkspace.tech)
+- **Email:** [tariq@smartaiworkspace.tech](mailto:tariq@smartaiworkspace.tech)
+- **Upwork:** [Hire me on Upwork](https://www.upwork.com/freelancers/~013c026e8e2d951ba3)
