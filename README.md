@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Built%20with-Claude%20Code-6B4FBB?style=flat-square" alt="Built with Claude Code">
-  <img src="https://img.shields.io/github/license/tariqosmani/smai-leadgen?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Status-Active-2ea44f?style=flat-square" alt="Status">
 </p>
