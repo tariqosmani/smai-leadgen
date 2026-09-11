@@ -101,9 +101,8 @@ scripts/inbox_math.py        cold-email infra sizing (domains / mailboxes / warm
 
 ## Status (2026-09-03)
 
-Pipeline store moved from ClickUp to the Airtable `Lead Pipeline` table. The 5 leads from the first run
-(Acme Co, Beta Inc, Gamma LLC, Delta Group, Epsilon Corp) are in Airtable;
-4 have Gmail drafts ready. 150 Explorium credits left.
+Pipeline store moved from ClickUp to the Airtable `Lead Pipeline` table. The 5 leads from the first
+live run are in Airtable; 4 have Gmail drafts ready. 150 Explorium credits left.
 
 ## Context sources (smart-ai-workspace only, read-only)
 
@@ -111,3 +110,7 @@ Pipeline store moved from ClickUp to the Airtable `Lead Pipeline` table. The 5 l
 - `../Tariq_Osmani_OS` — voice, connections, the Three Ms operating brain
 
 Replaces the `cold-email` and `lead-generator` skills in the OS repo.
+
+## License
+
+[MIT](LICENSE)

@@ -12,7 +12,7 @@ formal `/inbox-setup` run, so `/deliverability-monitor` has something to check.
   domain out of cold sending, always"). Acceptable at demo scale; `/inbox-setup` is the fix for
   a real client.
 - **Mailbox:** `info@smartaiworkspace.tech`, 1 mailbox.
-- **Outbound path:** connected account is the consumer Gmail `REDACTED-PERSONAL-EMAIL`, with
+- **Outbound path:** connected account is the founder's consumer Gmail account, with
   `info@smartaiworkspace.tech` added as a "Send mail as" alias. Gmail Settings > Accounts shows
   the alias configured as **"Mail is sent through: smtp.hostinger.com"** (port 465, SSL) - i.e.
   Gmail relays mail from this alias through Hostinger's SMTP, not straight out through Google.
