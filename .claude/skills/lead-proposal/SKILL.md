@@ -46,7 +46,7 @@ Essential / Growth (recommended) / Scale. Each solves a different-sized problem.
 ### 5. Write the Google Doc
 Order (`offer.md` Pricing method §4 "Proposal order"): current state (their words + numbers) → desired future state + business result → why founder-led / relevant portfolio proof → the three options with scope, assumptions, exclusions → milestones + payment events (§5, pay at signing then ~every 30 days, objective milestones) → estimated monthly run cost + volume assumption (§8, client-owned credentials) → measurement plan (§9, baseline + 3–5 metrics) → commercial terms note (MSA + SoW).
 
-Create the doc (`Google_Drive__create_file`, type Google Doc, title `{business name from identity.md} — Proposal for {Company} ({YYYY-MM-DD})`), then write the sections. Voice rules apply (no em dash, no hype). Reference ranges in `offer.md` are a **sanity check, not the quote** — the quote comes from the value model.
+Create the doc (`Google_Drive__create_file`, type Google Doc, title `{business name from identity.md} — Proposal for {Company} ({YYYY-MM-DD})`), then write the sections. Voice rules apply (no em dash, no hype). Reference ranges (`offer.md` > Reference ranges, numbers in the gitignored `clients/<client>/pricing-ranges.local.md` when present) are a **sanity check, not the quote** — the quote comes from the value model.
 
 ### 6. Update the lead record
 Show Tariq the draft link. On his go, via the pipeline adapter: `set_stage` → `Proposal Sent`;

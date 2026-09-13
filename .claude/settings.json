@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "deny": [
+      "mcp__claude_ai_Gmail__forward",
+      "mcp__claude_ai_Gmail__trash_message",
+      "mcp__claude_ai_Gmail__trash_thread",
+      "mcp__claude_ai_Gmail__delete_label",
+      "mcp__claude_ai_Google_Drive__share_file",
+      "mcp__claude_ai_Google_Drive__trash_file",
+      "mcp__hostinger-domains__domains_getDomainAuthorizationCodeV1",
+      "mcp__hostinger-domains__domains_disableDomainLockV1",
+      "mcp__hostinger-domains__domains_startOutgoingDomainMoveV1",
+      "mcp__hostinger-domains__domains_updateDomainNameserversV1",
+      "mcp__hostinger-domains__domains_changeWHOISProfileForDomainV1",
+      "mcp__hostinger-domains__domains_disablePrivacyProtectionV1",
+      "mcp__hostinger-dns__DNS_deleteDNSRecordsV1",
+      "mcp__hostinger-dns__DNS_resetDNSRecordsV1",
+      "mcp__hostinger-dns__DNS_restoreDNSSnapshotV1",
+      "mcp__hostinger-billing__billing_createPurchaseOrderV1",
+      "mcp__hostinger-billing__billing_deletePaymentMethodV1",
+      "mcp__hostinger-billing__billing_setDefaultPaymentMethodV1",
+      "mcp__hostinger-billing__billing_renewSubscriptionV1",
+      "mcp__hostinger-billing__billing_disableAutoRenewalV1",
+      "mcp__hostinger-vps",
+      "mcp__hostinger-hosting",
+      "mcp__hostinger-wordpress",
+      "mcp__hostinger-ecommerce",
+      "mcp__hostinger-agency-hosting",
+      "mcp__hostinger-reach"
+    ],
+    "ask": [
+      "mcp__hostinger-domains__domains_purchaseNewDomainV1",
+      "mcp__hostinger-dns__DNS_updateDNSRecordsV1",
+      "mcp__hostinger-domains__domains_createDomainForwardingV1"
+    ]
+  }
+}

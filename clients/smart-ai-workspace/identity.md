@@ -18,9 +18,16 @@ for the Google Doc title.
 - **from-name:** Tariq Osmani
 - **from-email:** info@smartaiworkspace.tech
 - **reply-to:** tariq@smartaiworkspace.tech
+- **postal_address_env:** SENDER_POSTAL_ADDRESS
 
 `from-email` is the connected Gmail account's actual send identity. Outreach is signed
 as the founder name above (Phase 3 autonomous send, see CLAUDE.md > Guardrails).
+
+The `.env` var named on the postal address line holds the business's physical mailing address for
+the compliance footer at the end of every cold email (`docs/outreach-playbook.md` > Compliance
+footer). The address itself never goes in this file, `clients/` is committed. A PO box or a
+registered virtual mailbox works. Not set: `/lead-outreach` sends no email and
+`scripts/check_client.py` fails.
 
 ## White-label
 

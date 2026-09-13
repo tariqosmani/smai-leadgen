@@ -62,7 +62,7 @@ past client results, named clients, or revenue figures. "Built and shipped" is h
 ## Pricing method
 
 How Smart AI Workspace prices client work. Adapted from Nate Herk's *"How to
-Price AI Solutions"* masterclass (`docs/reference/`). This is the internal
+Price AI Solutions"* masterclass. This is the internal
 process — the public `/pricing` page describes the method, never the numbers.
 
 ### The one rule
@@ -174,20 +174,12 @@ burden.
 
 ### Reference ranges — sanity check, not the quote
 
-What Smart AI Workspace's value-based numbers typically land at (2026,
-small-business focus):
-
-| | Range |
-|---|---|
-| Automation audit | Free |
-| Single production workflow | $5,000–$12,000 |
-| Multi-workflow system (3–5 connected) | $15,000–$35,000 |
-| Ongoing retainer | $1,500–$6,000/month |
-| Typical payback | 2–4 months |
-
-If a value-based number lands far outside these, re-check the value model or the
-scope before sending it. Enterprise-scale programs ($50k+) are not the target
-market.
+The dollar ranges Smart AI Workspace's value-based numbers typically land at are
+kept out of the public repo, in `clients/smart-ai-workspace/pricing-ranges.local.md`
+(gitignored). When that file exists, use it as the sanity check: if a value-based
+number lands far outside its ranges, re-check the value model or the scope before
+sending it. When it does not exist, skip the check. The quote comes from the value
+model either way.
 
 ### 4. Three-option proposal
 

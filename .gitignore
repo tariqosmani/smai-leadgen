@@ -18,3 +18,13 @@ data/exports/
 data/*-export.csv
 data/clickup-leads-export.csv
 clients/*/linkedin-heyreach-*.csv
+
+# per-client runtime records, written by the skills at run time (not config)
+# suppress.md = unsubscribed prospect emails (PII)
+clients/*/suppress.md
+clients/*/report-log.md
+clients/*/infrastructure.md
+clients/*/handover-inbox-setup-*.md
+
+# private per-client config kept off GitHub (e.g. pricing-ranges.local.md)
+clients/*/*.local.md

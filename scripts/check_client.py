@@ -8,6 +8,9 @@ sections. Getting this wrong means a skill runs with a half-configured client.
 If the client's `crm_target` is not `airtable`, also assert that the pipeline
 adapter doc exists and the `.env` var(s) named in `identity.md` are set.
 
+Always assert the postal address the cold-email compliance footer needs is set
+(`postal_address_env` in `identity.md` names the `.env` var).
+
 Run:  python scripts/check_client.py
       python scripts/check_client.py acme
       python scripts/check_client.py client=acme
@@ -131,6 +134,19 @@ def check_crm(slug):
     return problems
 
 
+def check_sending(slug):
+    """Every cold email carries a postal address (docs/outreach-playbook.md > Compliance footer)."""
+    identity = CLIENTS / slug / "identity.md"
+    if not identity.is_file():
+        return []  # already reported by check()
+    m = re.search(r"postal_address_env\W+([A-Z][A-Z0-9_]{2,})", identity.read_text(encoding="utf-8"))
+    if not m:
+        return [f"clients/{slug}/identity.md: no 'postal_address_env' line naming the .env var for the footer's postal address"]
+    if not _env_is_set(m.group(1)):
+        return [f"env var {m.group(1)} (postal address for the email compliance footer) is not set in .env or the environment"]
+    return []
+
+
 def _selftest():
     t = "- **crm_target:** instantly\n- **crm_api_key_env:** INSTANTLY_API_KEY\n"
     assert _identity_value(t, "crm_target") == "instantly", _identity_value(t, "crm_target")
@@ -140,12 +156,23 @@ def _selftest():
     d.mkdir(exist_ok=True)
     try:
         (d / "identity.md").write_text(
-            "- **crm_target:** instantly\n- **crm_api_key_env:** DEFINITELY_NOT_SET_XYZ\n",
+            "- **crm_target:** instantly\n- **crm_api_key_env:** DEFINITELY_NOT_SET_XYZ\n"
+            "- **postal_address_env:** ALSO_NOT_SET_XYZ\n",
             encoding="utf-8",
         )
         probs = check_crm("_selftest_tmp")
         assert any("DEFINITELY_NOT_SET_XYZ" in p for p in probs), probs
+        assert "ALSO_NOT_SET_XYZ" not in " ".join(probs), probs   # postal var is not a CRM var
+        probs = check_sending("_selftest_tmp")
+        assert len(probs) == 1 and "ALSO_NOT_SET_XYZ" in probs[0], probs
+        (d / "identity.md").write_text("- **crm_target:** airtable\n", encoding="utf-8")
+        probs = check_sending("_selftest_tmp")
+        assert len(probs) == 1 and "no 'postal_address_env' line" in probs[0], probs
+        os.environ["SELFTEST_POSTAL_XYZ"] = "PO Box 1, Springfield"
+        (d / "identity.md").write_text("- **postal_address_env:** SELFTEST_POSTAL_XYZ\n", encoding="utf-8")
+        assert check_sending("_selftest_tmp") == [], check_sending("_selftest_tmp")
     finally:
+        os.environ.pop("SELFTEST_POSTAL_XYZ", None)
         (d / "identity.md").unlink()
         d.rmdir()
     print("check_client.py: selftest passed")
@@ -160,13 +187,13 @@ def main():
         print("check_client.py: no active client. Set ACTIVE_CLIENT in .env or pass a slug.")
         sys.exit(1)
     print(f"check_client.py: active client '{slug}' (from {src})")
-    problems = check(slug) + check_crm(slug)
+    problems = check(slug) + check_crm(slug) + check_sending(slug)
     if problems:
         print("check_client.py: FAIL")
         for p in problems:
             print(f"  - {p}")
         sys.exit(1)
-    print(f"check_client.py: clients/{slug}/ OK - identity, icp, scoring, voice, offer all present with required sections")
+    print(f"check_client.py: clients/{slug}/ OK - identity, icp, scoring, voice, offer all present with required sections, postal address set")
 
 
 if __name__ == "__main__":

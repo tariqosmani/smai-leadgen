@@ -15,7 +15,7 @@ This skill *creates* a client config, it does not resolve an active one.
 - Structural template of record: `clients/smart-ai-workspace/`. Mirror its headings and section order in all five files, replace its content with the interview answers.
 
 ## Read first
-- `scripts/check_client.py` > `REQUIRED`: the exact substrings each of the five files must contain (case-insensitive). The files this skill writes MUST pass it. Also `check_crm()`: a non-`airtable` `crm_target` needs `docs/pipeline-adapters/<target>.md` to exist and `identity.md` to name the credential `.env` var(s) on a `crm_*_env` line.
+- `scripts/check_client.py` > `REQUIRED`: the exact substrings each of the five files must contain (case-insensitive). The files this skill writes MUST pass it. Also `check_crm()`: a non-`airtable` `crm_target` needs `docs/pipeline-adapters/<target>.md` to exist and `identity.md` to name the credential `.env` var(s) on a `crm_*_env` line. And `check_sending()`: `identity.md` must name the postal-address `.env` var on a `postal_address_env` line, and that var must be set.
 - `clients/smart-ai-workspace/identity.md`, `icp.md`, `scoring.md`, `voice.md`, `offer.md`: the structure to mirror.
 - `docs/pipeline-contract.md` + `docs/pipeline-adapters/`: the `crm_target` options (`airtable` and `instantly` wired, `hubspot` / `gohighlevel` stubs) for the identity.md CRM question.
 - `CLAUDE.md` > "Onboard a new client": the steps that stay manual after the five files exist, printed back in Step 5.
@@ -41,6 +41,7 @@ Ask one file's group at a time as a numbered batch. Every question accepts `skip
 3. `from-name` for outbound email. Default: the founder name.
 4. `from-email` (the connected Gmail send address).
 5. `reply-to`. Default: the `from-email`.
+   - Postal address for the cold-email compliance footer (`docs/outreach-playbook.md` > Compliance footer). Write only the `.env` var name that will hold it: `- **postal_address_env:** <SLUG>_POSTAL_ADDRESS` (default: the slug upper-cased, hyphens as underscores, plus `_POSTAL_ADDRESS`). The address itself never goes in the client folder. A PO box or virtual mailbox works.
 6. Primary website domain (bare, no scheme).
 7. Secondary sending domains. Default: none.
 8. `crm_target`: `airtable` (default), `instantly`, `hubspot` (stub), `gohighlevel` (stub).
@@ -83,20 +84,22 @@ Into `clients/<slug>/`, mirroring `clients/smart-ai-workspace/` structure. Each 
 | `offer.md` | `service line`, `portfolio`, `pricing` | `## Service lines`, `## Portfolio proof points`, `## Pricing method` |
 
 - Non-`airtable` `crm_target`: drop the Airtable base/table lines from `identity.md` and write the `crm_*_env` line(s) instead, e.g. `- **crm_api_key_env:** ACME_API_KEY`.
+- Always write the `postal_address_env` line under `## Sending identity` in `identity.md`.
 - Voice rules apply to every line: no em dashes, commas / periods / colons only, no AI filler.
 - A skipped question writes a `TODO: <what is missing>` line under the right heading. The heading still satisfies the check; Step 4 lists the TODO.
 
 ### 4. Validate
 `python scripts/check_client.py <slug>`.
 - Report PASS, or the exact failing lines.
-- On FAIL: add the missing heading or line and re-run until it passes. The one acceptable remaining failure is unset `crm_*_env` vars for a non-`airtable` target, those are a real onboarding step, carry them to Step 5.
+- On FAIL: add the missing heading or line and re-run until it passes. The acceptable remaining failures are unset `.env` vars: the `crm_*_env` vars for a non-`airtable` target and the `postal_address_env` var. Those are a real onboarding step, carry them to Step 5.
 - List every `TODO:` line written, so the operator knows what still needs a real answer before the client is run.
 
 ### 5. Print the steps that stay manual
 From CLAUDE.md > "Onboard a new client":
 1. Set `ACTIVE_CLIENT=<slug>` in `.env`, or pass `client=<slug>` per run.
 2. `crm_target: airtable` -> confirm the Airtable token in `.mcp.json` can reach the new base. Non-`airtable` -> set the named `.env` var(s) and read `docs/pipeline-adapters/<target>.md`.
-3. `/inbox-setup volume=<daily send target>` to stand up sending infrastructure. Run before the first `/lead-outreach`.
+3. Set the `postal_address_env` var in `.env` to the client's physical mailing address. No address, no email sends.
+4. `/inbox-setup volume=<daily send target>` to stand up sending infrastructure. Run before the first `/lead-outreach`.
 Then stop. This skill does not set `.env`, touch `.mcp.json`, or run `/inbox-setup`.
 
 ## Writes
