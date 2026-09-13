@@ -196,7 +196,7 @@ scripts/dnsbl_check.py       blocklist check + self-check
 
 ## Status
 
-Ships with one client, **smart-ai-workspace**. The system has run end to end on real leads: sourced and scored into Airtable, then 23 first-touch emails sent autonomously by 2026-09-10 with 0 bounces, SPF/DKIM/DMARC confirmed passing. Email sending is gated on the compliance footer's postal address, so a fresh clone sends nothing until one is configured.
+Ships with one client, **smart-ai-workspace**. The system runs live on real leads: sourced and scored into Airtable, then 59 leads emailed autonomously by 2026-09-13 (69 emails counting follow-ups) with 0 bounces, SPF/DKIM/DMARC confirmed passing. Email sending is gated on the compliance footer's postal address, so a fresh clone sends nothing until one is configured.
 
 ## License
 
