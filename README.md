@@ -11,7 +11,7 @@
 
 This isn't a demo. It sources real decision-makers, sends real cold emails signed as the founder, tracks a real pipeline, and reports real results — for [Smart AI Workspace](https://smartaiworkspace.tech), a B2B AI automation consultancy. Every piece of it (the scoring rubric, the outreach cadence, the deliverability guardrails, the CRM abstraction) exists because a real sales process needed it, not because it looked good in a spec.
 
-<p align="center"><i>Built by <a href="https://smartaiworkspace.tech">Tariq Osmani</a> — available to build the same for your business. See <a href="#hire-me">Hire Me</a>.</i></p>
+<p align="center"><i>Built by <a href="https://www.upwork.com/freelancers/tariqosmani">Tariq Osmani</a> — available to build the same for your business. See <a href="#hire-me">Hire Me</a>.</i></p>
 
 ---
 
@@ -204,8 +204,6 @@ Ships with one client, **smart-ai-workspace**. The system runs live on real lead
 
 ## Hire Me
 
-I build systems like this one — sourcing, outreach, CRM, and reporting wired together as autonomous agent skills, not a pile of disconnected tools. If you want the same for your business:
+I build systems like this one — sourcing, outreach, CRM, and reporting wired together as autonomous agent skills, not a pile of disconnected tools. If you want the same for your business, hire me on Upwork:
 
-- **Website:** [smartaiworkspace.tech](https://smartaiworkspace.tech)
-- **Email:** [tariq@smartaiworkspace.tech](mailto:tariq@smartaiworkspace.tech)
-- **Upwork:** [Hire me on Upwork](https://www.upwork.com/freelancers/~013c026e8e2d951ba3)
+**[upwork.com/freelancers/tariqosmani](https://www.upwork.com/freelancers/tariqosmani)**
