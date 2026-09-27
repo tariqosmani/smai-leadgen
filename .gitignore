@@ -12,6 +12,9 @@ __pycache__/
 *.pyc
 .claude/worktrees/
 
+# marketing collateral kept local, not part of the OSS repo
+case-studies/
+
 # lead data (keep the system, not the leads — real prospect PII, never push)
 data/*.json
 data/exports/
@@ -28,3 +31,7 @@ clients/*/handover-inbox-setup-*.md
 
 # private per-client config kept off GitHub (e.g. pricing-ranges.local.md)
 clients/*/*.local.md
+
+# trigger.dev
+node_modules/
+.trigger
