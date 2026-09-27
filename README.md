@@ -5,13 +5,15 @@
   <img src="https://img.shields.io/badge/Status-Active-2ea44f?style=flat-square" alt="Status">
 </p>
 
-# Autonomous B2B Outbound Engine
+# smai-leadgen: my internal outbound system
 
-**A complete outbound sales system — sourcing, scoring, outreach, reply triage, and reporting — built entirely as a set of AI agent skills, running for a real business.**
+**Tariq Osmani is the founder of Smart AI Workspace, a founder-led B2B AI automation consultancy building Claude-based agents and agentic workflows.**
 
-This isn't a demo. It sources real decision-makers, sends real cold emails signed as the founder, tracks a real pipeline, and reports real results — for [Smart AI Workspace](https://smartaiworkspace.tech), a B2B AI automation consultancy. Every piece of it (the scoring rubric, the outreach cadence, the deliverability guardrails, the CRM abstraction) exists because a real sales process needed it, not because it looked good in a spec.
+This repository is my internal outbound system: the Claude Code agent skills I use to find, score and email prospects for [Smart AI Workspace](https://www.smartaiworkspace.tech), triage their replies, and report on the pipeline. It's one of the agentic workflows I build and run in production, made public so you can see how I work.
 
-<p align="center"><i>Built by <a href="https://www.upwork.com/freelancers/tariqosmani">Tariq Osmani</a> — available to build the same for your business. See <a href="#hire-me">Hire Me</a>.</i></p>
+It runs for a real business: real decision-makers, real cold emails signed as the founder, a real pipeline. Every piece (the scoring rubric, the outreach cadence, the deliverability and compliance guardrails, the CRM abstraction) exists because a real sales process needed it.
+
+<p align="center"><i>Built by <a href="https://www.smartaiworkspace.tech/about/tariq-osmani">Tariq Osmani</a>. Want an agentic workflow like this for your business? See <a href="#hire-me">Hire Me</a>.</i></p>
 
 ---
 
