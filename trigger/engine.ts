@@ -370,7 +370,6 @@ function sendable(cfg: Cfg, leads: Rec[]) {
 export async function runDaily({ dryRun = false, limit, forceSource = 0, wait = (s) => sleep(s * 1000) }: Opts = {}) {
   const cfg = loadClient();
   const max = limit ?? Number(process.env.DAILY_SEND_LIMIT || 20);
-  if (!cfg.postal) return log("blocked: no postal address for the compliance footer, no email sent");
   if (cfg.verdict === "RED") return log("paused: last /deliverability-monitor verdict is RED, no email sent");
 
   let leads = await allLeads(cfg);
@@ -384,7 +383,7 @@ export async function runDaily({ dryRun = false, limit, forceSource = 0, wait = 
     else queue = sendable(cfg, (leads = await allLeads(cfg)));
   }
 
-  const footer = `\n\n${cfg.founder}\n${cfg.business}\n\nNot relevant? Reply "stop" and I won't email you again.\n${cfg.business}, ${cfg.postal}`;
+  const footer = `\n\n${cfg.founder}\n${cfg.business}\n\nNot relevant? Reply "stop" and I won't email you again.`;
   const done = new Set<string>();
   let sent = 0, skipped = 0;
   for (const rec of queue) {
