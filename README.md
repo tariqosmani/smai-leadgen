@@ -84,7 +84,7 @@ An autonomous system that emails real people and spends real money needs real li
 - **Spend gates** — anything that costs money (enrichment credits, sending domains) shows an itemized estimate and waits for an explicit yes before it runs.
 - **Deliverability circuit breaker** — a RED verdict from the weekly health check pauses outbound sending for the affected domain until the cause is fixed.
 - **Human-in-the-loop where it matters** — LinkedIn messages are always paste-ready text a human sends by hand; a reply that needs a real answer is left as a draft, never auto-sent.
-- **Compliance footer** — every cold email ends with an opt-out line and the sender's postal address (CAN-SPAM, CASL). No address configured, no email goes out. Opt-outs land on a per-client suppression list that every later run checks.
+- **Compliance footer** — every cold email ends with an opt-out line. Opt-outs land on a per-client suppression list that every later run checks.
 - **Untrusted input, hard permissions** — reply emails, imported CSVs and scraped data are treated as data, never instructions. A committed [`.claude/settings.json`](.claude/settings.json) denies the tools the system never needs (mail forwarding, domain transfer, payment changes) and forces a Claude Code permission prompt before any domain purchase or DNS change, so the riskiest gates are enforced by the harness, not only by the prompt.
 
 Full guardrail list: [CLAUDE.md](CLAUDE.md).
@@ -102,8 +102,7 @@ Full guardrail list: [CLAUDE.md](CLAUDE.md).
 
 ```bash
 cp .env.example .env
-# fill in .env: ACTIVE_CLIENT=smart-ai-workspace, SENDER_POSTAL_ADDRESS (the mailing address
-# every cold email's compliance footer needs, no address = no sends), plus any LLM/API keys
+# fill in .env: ACTIVE_CLIENT=smart-ai-workspace, plus any LLM/API keys
 
 python scripts/check_client.py   # → "clients/<slug>/ OK"
 python scripts/normalize.py      # → "all checks passed"
@@ -123,8 +122,7 @@ This runs a guided interview and writes all five config files for you. By hand i
 
 1. `cp -r clients/smart-ai-workspace clients/<new-slug>`
 2. Edit all five files, starting with `identity.md`.
-3. Set `ACTIVE_CLIENT=<new-slug>` in `.env`, or pass `client=<new-slug>` on any single run. Set the client's postal address in the `.env` var named by `postal_address_env` in `identity.md`.
-4. `python scripts/check_client.py` should print OK.
+3. Set `ACTIVE_CLIENT=<new-slug>` in `.env`, or pass `client=<new-slug>` on any single run.4. `python scripts/check_client.py` should print OK.
 5. Wire the CRM: confirm the Airtable token can reach the new base, or set up another adapter per `docs/pipeline-adapters/<target>.md`.
 6. `/inbox-setup volume=<daily target>` — stands up sending domains, mailboxes, DNS auth, and warmup.
 
@@ -196,8 +194,7 @@ scripts/dnsbl_check.py       blocklist check + self-check
 
 ## Status
 
-Ships with one client, **smart-ai-workspace**. The system runs live on real leads: sourced and scored into Airtable, then 59 leads emailed by 2026-09-13 (69 emails counting follow-ups) with 1 bounce (1.7%), SPF/DKIM/DMARC confirmed passing. Email sending is gated on the compliance footer's postal address, so a fresh clone sends nothing until one is configured.
-
+Ships with one client, **smart-ai-workspace**. The system runs live on real leads: sourced and scored into Airtable, then 59 leads emailed by 2026-09-13 (69 emails counting follow-ups) with 1 bounce (1.7%), SPF/DKIM/DMARC confirmed passing.
 ## License
 
 [MIT](LICENSE)

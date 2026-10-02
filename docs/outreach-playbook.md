@@ -32,15 +32,11 @@ this footer:
 <business name>
 
 Not relevant? Reply "stop" and I won't email you again.
-<business name>, <postal address>
 ```
 
-- `<postal address>` is the value of the `.env` var named on the `postal_address_env` line in
-  `clients/<client>/identity.md`. Missing or blank: no email goes out (`/lead-outreach` step 1).
+- No postal address in the footer (removed by Tariq 2026-10-02).
 - The footer does not count toward the word limits in the cadence table below. No em dash in it.
-- Why: CAN-SPAM (US) and CASL (Canada) require a physical mailing address in every commercial
-  email, and UK, EU and Australian rules require a clear sender identity and a working opt-out.
-  A reply of "stop" is that opt-out: `/lead-replies` classifies it as `unsubscribe` and adds the
+- A reply of "stop" is that opt-out: `/lead-replies` classifies it as `unsubscribe` and adds the
   address to `clients/<client>/suppress.md`. CAN-SPAM allows 10 business days to honor it, so run
   `/lead-replies` at least twice a week while a campaign is live.
 - LinkedIn messages and the `/lead-replies` booking drafts (answers to a prospect who wrote first)

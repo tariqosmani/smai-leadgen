@@ -7,7 +7,7 @@ import { parseEnv } from "node:util";
 // so they sync nothing and use the values already stored in the trigger.dev dashboard.
 const dotenv = (existsSync(".env") ? parseEnv(readFileSync(".env", "utf8")) : {}) as Record<string, string>;
 // Only what the daily job needs goes to trigger.dev.
-const SYNC = ["ACTIVE_CLIENT", "SENDER_POSTAL_ADDRESS", "AIRTABLE_API_KEY", "APOLLO_API_KEY", "CLAY_API_KEY",
+const SYNC = ["ACTIVE_CLIENT", "AIRTABLE_API_KEY", "APOLLO_API_KEY", "CLAY_API_KEY",
   "COMPOSIO_API_KEY", "LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL", "DAILY_SEND_LIMIT"];
 
 export default defineConfig({

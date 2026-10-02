@@ -64,7 +64,6 @@ function loadClient() {
     business: field("Business name"),
     founder: field("Founder name"),
     fromEmail: field("from-email"),
-    postal: process.env[field("postal_address_env") || "SENDER_POSTAL_ADDRESS"] ?? "",
     base: field("Airtable base ID"),
     table: identity.match(/table id:\s*(tbl\w+)/i)?.[1] ?? field("Airtable table name"),
     icp: read("icp.md"),

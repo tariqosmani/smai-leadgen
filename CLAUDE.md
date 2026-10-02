@@ -35,7 +35,8 @@ The skill then reads `clients/<slug>/`:
 
 1. `cp -r clients/smart-ai-workspace clients/<new-slug>` (or create the five files by hand).
 2. Edit all five files for the new business. `identity.md` first: name, founder, sending identity, `crm_target` (+ base/table if `airtable`, else the `.env` var names).
-3. Set `ACTIVE_CLIENT=<new-slug>` in `.env`, or pass `client=<new-slug>` per run.4. `python scripts/check_client.py` asserts the five files exist with their required sections, that the postal address var is set, and (for a non-`airtable` target) that the adapter doc exists and the named `.env` vars are set.
+3. Set `ACTIVE_CLIENT=<new-slug>` in `.env`, or pass `client=<new-slug>` per run.
+4. `python scripts/check_client.py` asserts the five files exist with their required sections, and (for a non-`airtable` target) that the adapter doc exists and the named `.env` vars are set.
 5. If `crm_target: airtable`, make sure the Airtable token in `.mcp.json` can reach the new base. If not `airtable`, add the adapter's `.env` var(s) and read `docs/pipeline-adapters/<target>.md`.
 6. `/inbox-setup volume=<daily send target>` stands up cold-email sending infrastructure for the client: it sizes the setup, checks sending-domain availability and price via the Hostinger MCP, buys domains only on an explicit in-session yes to a shown total, auto-creates SPF / DMARC / MX / DKIM and a redirect to the primary site, and outputs the Google Workspace + Instantly/Smartlead warmup steps. Records what was provisioned in `clients/<slug>/infrastructure.md`. Run before the first `/lead-outreach`.
 

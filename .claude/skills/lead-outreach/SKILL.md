@@ -13,7 +13,7 @@ bike-method-phase: 3
 Resolve the active client: a `client=<slug>` invocation arg wins, else `ACTIVE_CLIENT` in `.env`. Then read:
 - `clients/<client>/voice.md`: the client's register
 - `clients/<client>/offer.md`: Portfolio proof points (the only proof you may cite)
-- `clients/<client>/identity.md`: business name, from-name / from-email / reply-to, `postal_address_env` (the `.env` var holding the footer's postal address), CRM base + table, `linkedin_mode` (`manual` default, or `heyreach`; see `docs/linkedin-automation.md`)
+- `clients/<client>/identity.md`: business name, from-name / from-email / reply-to, CRM base + table, `linkedin_mode` (`manual` default, or `heyreach`; see `docs/linkedin-automation.md`)
 
 ## Read first
 - `docs/outreach-playbook.md`: cadence table + the hard voice rules (apply to every client)
@@ -45,8 +45,6 @@ Email touch 1 + follow-ups send without per-message approval, signed as the clie
 ### 1. Pull the work list
 **Deliverability gate (email channel):** if the last `## Deliverability checks` line in `clients/<client>/infrastructure.md` records a **RED** verdict, do not send email for this client. Report "email sends paused, last /deliverability-monitor verdict RED" and process LinkedIn drafts only. No `infrastructure.md` or no check line: proceed. (CLAUDE.md > Guardrails > Deliverability.)
 
-**Compliance gate (email channel):** read the `.env` var named on the `postal_address_env` line of `identity.md`. No such line, or the var is blank: do not send email for this client. Report "email sends blocked, no postal address for the compliance footer (set <VAR> in .env)" and process LinkedIn drafts only. (`docs/outreach-playbook.md` > Compliance footer.)
-
 `list_leads` via the pipeline adapter. Select records where `stage` is:
 - `Qualified` → needs touch 1, or
 - `Contacted` with `next_action_date` ≤ today and `activity_log` shows < 5 emails sent → needs the next follow-up.
@@ -66,12 +64,12 @@ address, first touch or follow-up.
 3. **Body** — the framework shape, the industry pain from `clients/<client>/icp.md`, at most one portfolio proof from `clients/<client>/offer.md` ("built and shipped X", never a client name or an invented number). One ask, interest-based ("worth a look?" beats "got 15 minutes Tuesday?").
 4. **Subject** (touch 1 only) — `references/subject-lines.md`: 2 to 4 words, lowercase, internal-looking, about their situation. Follow-ups reply in-thread and keep the subject.
 5. **Follow-up angle** — the row for touch N in `references/follow-up-sequences.md`. One new value proposition per email. Never "just checking in".
-6. **Footer** — end every email, follow-ups and breakup included, with the compliance footer from `docs/outreach-playbook.md` > Compliance footer, filled with the real postal address. It does not count toward the word limit.
+6. **Footer** — end every email, follow-ups and breakup included, with the compliance footer from `docs/outreach-playbook.md` > Compliance footer (no postal address). It does not count toward the word limit.
 
 Run every draft through the voice checklist in `outreach-playbook.md`. **Any rule fails → rewrite.** No em dash anywhere, subject included.
 
 ### 3. Self-check the batch
-For each draft confirm: framework fits the lead type, opener passes the "So what?" test and ties to the problem, subject is 2 to 4 lowercase words about their situation, only real portfolio proof (no client names / invented numbers), no AI filler, no em dash, the compliance footer is present with the real postal address. A draft that fails is rewritten, not sent. Drop any lead whose company was already contacted in the last 7 days (queue it, Step 5). Drop any lead now hitting `clients/<client>/suppress.md` (Step 1).
+For each draft confirm: framework fits the lead type, opener passes the "So what?" test and ties to the problem, subject is 2 to 4 lowercase words about their situation, only real portfolio proof (no client names / invented numbers), no AI filler, no em dash, the compliance footer is present and has no postal address. A draft that fails is rewritten, not sent. Drop any lead whose company was already contacted in the last 7 days (queue it, Step 5). Drop any lead now hitting `clients/<client>/suppress.md` (Step 1).
 
 ### 4. Send / output text
 If the adapter owns sending (`crm_target: instantly`): skip Gmail. `create_lead` pushes the lead into
